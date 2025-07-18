@@ -1,0 +1,13 @@
+max-width: 210mm;
+    margin: 0 auto;
+    padding: 2cm 1cm 1cm 1cm;
+    background: white;
+}
+=======
+.container {
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 2cm 1cm 1cm 1cm;
+    padding-top: 60px;
+    background: white;
+}
