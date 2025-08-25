@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Pembayaran SPP</title>
      <link href="{{ asset('css/filament/print/printpage.css') }}" rel="stylesheet">
-     <link href="{{ asset('css/filament/print/printpage.css') }}" rel="stylesheet">
      <style>
         .container {
             max-width: 100%;
@@ -15,7 +14,7 @@
             padding: 70px 1cm 1cm 1cm;
             background: white;
         }
-        
+
     </style>
 </head>
 <body>

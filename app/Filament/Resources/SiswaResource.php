@@ -28,6 +28,10 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\SiswaResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\SiswaResource\RelationManagers;
+use App\Imports\SiswaImport;
+use Maatwebsite\Excel\Facades\Excel;
+use Filament\Notifications\Notification;
+use Filament\Forms\Components\FileUpload as FilamentFileUpload;
 
 class SiswaResource extends Resource
 {
@@ -668,6 +672,53 @@ class SiswaResource extends Resource
                     ->color('success')
                     ->url(route('filament.resources.siswas.print-report'))
                     ->openUrlInNewTab(),
+
+
+            Tables\Actions\Action::make('download-template-excel')
+                ->label('Download Template Excel')
+                ->tooltip('Download Template Excel')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('info')
+                ->url('/templates/siswa_import_template.xlsx')
+                ->openUrlInNewTab(),
+
+
+            Tables\Actions\Action::make('import')
+                ->label('Import Data')
+                ->modalDescription('Pilih file CSV atau Excel untuk mengimpor data siswa.')
+                ->icon('heroicon-o-arrow-up-tray')
+                ->color('warning')
+                ->modalWidth('sm')
+                ->form([
+                    FilamentFileUpload::make('file')
+                        ->label('File CSV or Excel')
+                        ->required()
+                        ->acceptedFileTypes([
+                            'text/csv',
+                            'application/vnd.ms-excel',
+                            'text/plain',
+                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                            'application/vnd.ms-excel.sheet.macroEnabled.12',
+                        ])
+                        ->maxSize(10240), // 10MB max
+                ])
+                ->action(function (array $data) {
+                    try {
+                        Excel::import(new SiswaImport, $data['file']->getRealPath());
+
+                        Notification::make()
+                            ->title('Import berhasil')
+                            ->success()
+                            ->send();
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Import gagal: ' . $e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->modalHeading('Import Data Siswa')
+                ->modalSubmitActionLabel('Import'),
             ])
 
             ->bulkActions([

@@ -22,35 +22,46 @@ class LoginNotification
     public function handle(Login $event): void
     {
         $user = $event->user;
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Jakarta');
         $greeting = $this->getTimeBasedGreeting($now);
         $roleMessage = $this->getRoleBasedMessage($user->role);
-        
+
         Notification::make()
-            ->title($greeting)
-            ->body("Selamat datang, {$user->name}! {$roleMessage}")
+            ->title($greeting . ' ' . $user->name)
+            ->body("Selamat datang, {$roleMessage}")
             ->success()
             ->duration(5000)
             ->icon('heroicon-o-hand-raised')
             ->iconColor('success')
             ->send();
     }
-    
+
     private function getTimeBasedGreeting(Carbon $time): string
     {
         $hour = $time->hour;
-        
-        if ($hour < 12) {
+
+        if ($hour >= 5 && $hour < 12) {
             return 'Selamat Pagi!';
-        } elseif ($hour < 15) {
+        } elseif ($hour >= 12 && $hour < 15) {
             return 'Selamat Siang!';
-        } elseif ($hour < 18) {
+        } elseif ($hour >= 15 && $hour < 18) {
             return 'Selamat Sore!';
         } else {
             return 'Selamat Malam!';
         }
+
+
+        // if ($hour < 12) {
+        //     return 'Selamat Pagi!';
+        // } elseif ($hour < 15) {
+        //     return 'Selamat Siang!';
+        // } elseif ($hour < 18) {
+        //     return 'Selamat Sore!';
+        // } else {
+        //     return 'Selamat Malam!';
+        // }
     }
-    
+
     private function getRoleBasedMessage(string $role): string
     {
         return match ($role) {

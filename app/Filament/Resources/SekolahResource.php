@@ -216,6 +216,36 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
                     ->collapsible()
                     ->collapsed()
                     ->columns(1),
+            Forms\Components\Section::make('Logo yayasan')
+                ->description('Upload logo resmi Yayasan')
+                ->icon('heroicon-o-photo')
+                ->schema([
+                    Forms\Components\FileUpload::make('logo_yayasan')
+                        ->label('Logo Sekolah')
+                        ->image()
+                        ->directory('sekolah/logo_yayasan')
+                        ->disk('public')
+                        ->visibility('public')
+                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/svg+xml'])
+                        ->maxSize(2048)
+                        ->imageEditor()
+                        ->imageEditorAspectRatios([
+                            '1:1',
+                            '4:3',
+                            '16:9',
+                        ])
+                        ->imageResizeMode('cover')
+                        ->imageCropAspectRatio('1:1')
+                        ->imageResizeTargetWidth('500')
+                        ->imageResizeTargetHeight('500')
+                        ->previewable()
+                        ->downloadable()
+                        ->helperText('Format: JPG, PNG, SVG. Maksimal 2MB. Rasio 1:1 disarankan.')
+                        ->columnSpanFull(),
+                ])
+                ->collapsible()
+                ->collapsed()
+                ->columns(1),
 
                 Forms\Components\Section::make('Informasi Tambahan')
                     ->description('Data tambahan dan keterangan sekolah')
@@ -279,6 +309,12 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
                     ->size(60)
                     ->defaultImageUrl(url('/images/default-school-logo.png'))
                     ->toggleable(isToggledHiddenByDefault: false),
+            Tables\Columns\ImageColumn::make('logo_yayasan')
+                ->label('Logo Yayasan')
+                ->circular()
+                ->size(60)
+                ->defaultImageUrl(url('/images/default-school-logo.png'))
+                ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('nama_sekolah')
                     ->label('Nama Sekolah')

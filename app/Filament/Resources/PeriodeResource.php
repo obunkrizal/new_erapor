@@ -60,14 +60,18 @@ class PeriodeResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Section::make('Informasi Periode')
-                    ->schema([
-                        Forms\Components\TextInput::make('nama_periode')
-                            ->label('Nama Periode')
-                            ->required(),
+                ->schema([
 
-                        Forms\Components\TextInput::make('tahun_ajaran')
+                Forms\Components\Select::make('tahun_ajaran')
                             ->label('Tahun Ajaran')
-                            ->required(),
+                    ->options(self::getTahunAjaranOptions())
+                    ->required()
+                    ->searchable()
+                    ->native(false)
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                        self::generateNamaPeriode($set, $get);
+                    }),
 
                         Forms\Components\Select::make('semester')
                             ->label('Semester')
@@ -75,7 +79,19 @@ class PeriodeResource extends Resource
                                 'ganjil' => 'Ganjil',
                                 'genap' => 'Genap',
                             ])
-                            ->required(),
+                    ->required()
+                    ->native(false)
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                        self::generateNamaPeriode($set, $get);
+                    }),
+
+                Forms\Components\TextInput::make('nama_periode')
+                    ->label('Nama Periode')
+                    ->required()
+                    ->readOnly()
+                    ->dehydrated()
+                    ->helperText('Nama periode akan dibuat otomatis berdasarkan tahun ajaran dan semester'),
 
                         Forms\Components\Toggle::make('is_active')
                             ->label('Status Aktif')
@@ -83,6 +99,34 @@ class PeriodeResource extends Resource
                     ])
                     ->columns(2),
             ]);
+    }
+
+    private static function getTahunAjaranOptions(): array
+    {
+        $currentYear = date('Y');
+        $options = [];
+
+        // Generate options for 5 years back and 5 years forward
+        for ($i = -5; $i <= 5; $i++) {
+            $startYear = $currentYear + $i;
+            $endYear = $startYear + 1;
+            $tahunAjaran = $startYear . '/' . $endYear;
+            $options[$tahunAjaran] = $tahunAjaran;
+        }
+
+        return $options;
+    }
+
+    private static function generateNamaPeriode(Forms\Set $set, Forms\Get $get): void
+    {
+        $tahunAjaran = $get('tahun_ajaran');
+        $semester = $get('semester');
+
+        if ($tahunAjaran && $semester) {
+            $semesterLabel = $semester === 'ganjil' ? 'Ganjil' : 'Genap';
+            $namaPeriode = "Semester {$semesterLabel} {$tahunAjaran}";
+            $set('nama_periode', $namaPeriode);
+        }
     }
 
     public static function table(Table $table): Table
@@ -102,7 +146,7 @@ class PeriodeResource extends Resource
                 Tables\Columns\TextColumn::make('semester')
                     ->label('Semester')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                ->color(fn(string $state): string => match ($state) {
                         'ganjil' => 'info',
                         'genap' => 'success',
                         default => 'gray',
@@ -117,7 +161,11 @@ class PeriodeResource extends Resource
                     ->falseColor('danger'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('semester')
+            Tables\Filters\SelectFilter::make('tahun_ajaran')
+                ->label('Tahun Ajaran')
+                ->options(self::getTahunAjaranOptions()),
+
+            Tables\Filters\SelectFilter::make('semester')
                     ->options([
                         'ganjil' => 'Ganjil',
                         'genap' => 'Genap',

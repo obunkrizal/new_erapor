@@ -19,6 +19,7 @@ class Sekolah extends Model
         'akreditasi',
         'guru_id',
         'logo',
+        'logo_yayasan',
         'website',
         'status',
         'visi',

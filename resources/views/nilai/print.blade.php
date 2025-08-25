@@ -22,7 +22,7 @@
 </head>
 
 <body>
-    
+
 
     @if (session('errorMessage') || $errors->has('validation') || isset($errorMessage))
         <div class="error-message-box">
@@ -406,7 +406,7 @@
                     <div class="column">
                         <table class="info-table">
                             <tr>
-                                <td class="label" widht="50px">Tanpa Keterangan</td>
+                                <td class="label" widht="50px">Alfa</td>
                                 <td class="value">{{ $absensi?->tanpa_keterangan ?? '-' }} Hari</td>
                             </tr>
 
@@ -474,124 +474,6 @@
         </div>
     </div>
 
-    <style>
-        /* Enhanced signature section styling */
-        .signature-section {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-            page-break-inside: avoid;
-            padding: 20px 0;
-        }
-
-        .signature-box {
-            text-align: center;
-            width: 200px;
-            padding: 10px;
-            margin-top: 0px;
-            margin-bottom: 0px;
-        }
-
-        .signature-box div {
-            margin-bottom: 8px;
-            font-size: 12px;
-            line-height: 1.4;
-        }
-
-        .signature-line {
-            border-top: 1px solid #000;
-            margin-top: 60px;
-            padding-top: 8px;
-            font-weight: bold;
-            font-size: 11px;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .signature-line small {
-            font-size: 9px;
-            font-weight: normal;
-            color: #666;
-        }
-
-        /* School footer styling */
-        .school-footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #ddd;
-            page-break-inside: avoid;
-        }
-
-        .school-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .school-logo {
-            flex-shrink: 0;
-        }
-
-        .logo-img {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-            border-radius: 8px;
-        }
-
-        .school-details {
-            flex: 1;
-        }
-
-        .school-details h4 {
-            margin: 0 0 8px 0;
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .school-details p {
-            margin: 2px 0;
-            font-size: 10px;
-            color: #666;
-            line-height: 1.3;
-        }
-
-        .print-info {
-            margin-top: 100px;
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
-            font-size: 9px;
-            color: #999;
-            text-align: center;
-            page-break-inside: avoid;
-        }
-
-        .print-info p {
-            margin-bottom: 3px;
-        }
-
-        @media print {
-            .signature-section {
-                margin-top: 30px;
-            }
-
-            .signature-line {
-                margin-top: 50px;
-            }
-
-            .school-footer {
-                margin-top: 25px;
-            }
-
-            .logo-img {
-                width: 50px;
-                height: 50px;
-            }
-        }
-    </style>
 
     <script>
         // Auto print when page loads (optional)

@@ -19,13 +19,10 @@ class PrintSuratKeputusanController extends Controller
 
     public function print(SuratKeputusanGuru $suratKeputusan)
     {
-        $sekolah=Sekolah::first();
-        $surat=SuratKeputusanGuru::first();
-        $data = [
-            'surat' => $suratKeputusan,
-            'tanggal_cetak' => Carbon::now()->locale('id')->isoFormat('D MMMM Y'),
-        ];
-        return view('print.surat-keputusan', compact('data','surat','sekolah'));
+        $sekolah = Sekolah::first();
+        $tanggal_cetak = Carbon::now()->locale('id')->isoFormat('D MMMM Y');
+        $surat = $suratKeputusan;
+        return view('print.surat-keputusan', compact('surat', 'tanggal_cetak', 'sekolah'));
     }
 
     public function download(SuratKeputusanGuru $suratKeputusan)
@@ -44,7 +41,7 @@ class PrintSuratKeputusanController extends Controller
                 'isHtml5ParserEnabled' => true,
             ]);
 
-        $filename = "Surat_Keputusan_" . $this->sanitizeFilename($suratKeputusan->nomor_surat) . ".pdf";
+        $filename = $suratKeputusan->file_surat ?? "Surat_Keputusan_" . $this->sanitizeFilename($suratKeputusan->nomor_surat) . ".pdf";
 
         return $pdf->download($filename);
     }
