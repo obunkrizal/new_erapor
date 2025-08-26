@@ -30,6 +30,9 @@ class User extends Authenticatable
         'is_active' => 'boolean',
     ];
 
+
+
+    
     // Override the default authentication query
     public function newEloquentBuilder($query)
     {

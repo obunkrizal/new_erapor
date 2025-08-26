@@ -114,7 +114,7 @@
                     </div>
                     <div>
                         <div>
-                            <p style="text-align: center">Qr Code</p>
+                            <p style="text-align: center">ScanMe!</p>
 
                             <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($kelasSiswa->siswa?->nama_lengkap) . '_ NIS: ' . $kelasSiswa->siswa?->nis . '_ NISN: ' . $kelasSiswa->siswa?->nisn . '_' . $kelasSiswa->siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($kelasSiswa->siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
                                 alt="barcode" width="65" />
@@ -256,7 +256,7 @@
                         @endif
 
                     </strong>
-                    <small style="margin-top: 0;">NIP: {{ $sekolah->guru->nip ?? '-' }}</small>
+                    <small style="margin-top: 0;">NUPTK: {{ $sekolah->guru->nuptk ?? '-' }}</small>
                 </div>
             </div>
 

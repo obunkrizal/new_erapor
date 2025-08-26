@@ -15,9 +15,9 @@ class PeriodeSeeder extends Seeder
     public function run(): void
     {
         $periodes = [
-            
+
             [
-                'name' => 'Semester Ganjil 2024/2025',
+                'nama_periode' => 'Semester Ganjil 2024/2025',
                 'tahun_ajaran' => '2024/2025',
                 'semester' => 'ganjil',
                 'is_active' => true,
@@ -25,7 +25,7 @@ class PeriodeSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'Semester Genap 2024/2025',
+                'nama_periode' => 'Semester Genap 2024/2025',
                 'tahun_ajaran' => '2024/2025',
                 'semester' => 'genap',
                 'is_active' => false,
@@ -33,7 +33,7 @@ class PeriodeSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'Semester Ganjil 2025/2026',
+                'nama_periode' => 'Semester Ganjil 2025/2026',
                 'tahun_ajaran' => '2025/2026',
                 'semester' => 'ganjil',
                 'is_active' => false,

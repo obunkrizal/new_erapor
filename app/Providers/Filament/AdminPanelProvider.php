@@ -9,6 +9,7 @@ use Filament\PanelProvider;
 use App\Filament\Pages\Auth\Login;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Auth;
+use App\Filament\Widgets\GuruSummaryWidget;
 use App\Filament\Widgets\NilaiStatsWidget;
 use App\Filament\Widgets\SiswaStatsWidget;
 use Filament\Http\Middleware\Authenticate;
@@ -36,12 +37,12 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->sidebarCollapsibleOnDesktop()
             ->colors([
-                'danger' => Color::Rose,
-                'gray' => Color::Gray,
-                'info' => Color::Blue,
-                'primary' => Color::Indigo,
-                'success' => Color::Emerald,
-                'warning' => Color::Orange,
+                'danger' => Color::Red,
+                'gray' => Color::Slate,
+                'info' => Color::Sky,
+                'primary' => Color::Blue,
+                'success' => Color::Green,
+                'warning' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -55,7 +56,7 @@ class AdminPanelProvider extends PanelProvider
                 // QuickActionsWidget::class,
                 // PeriodeOverviewWidget::class,
                 SiswaStatsWidget::class,
-                // GuruStatsWidget::class,
+                GuruSummaryWidget::class,
                 // NilaiStatsWidget::class,
             ])
             ->middleware([

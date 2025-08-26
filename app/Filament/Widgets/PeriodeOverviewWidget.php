@@ -49,6 +49,8 @@ class PeriodeOverviewWidget extends BaseWidget
 
         // Average students per class
         $avgSiswaPerKelas = $totalKelas > 0 ? round($totalSiswa / $totalKelas, 1) : 0;
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
 
         return [
             Stat::make('Periode Aktif', $activePeriode->nama_periode)
@@ -96,7 +98,7 @@ class PeriodeOverviewWidget extends BaseWidget
                 ->extraAttributes([
                     'class' => 'cursor-pointer',
                 ])
-                ->url(Auth::user()?->isAdmin() ? route('filament.admin.resources.nilais.index', [
+                ->url( $user?->isAdmin() ? route('filament.admin.resources.nilais.index', [
                     'tableFilters' => [
                         'periode_id' => ['values' => [$activePeriode->id]]
                     ]

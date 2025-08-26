@@ -4,29 +4,28 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddNoInvToPembayaranSppsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('pembayaran_spps', function (Blueprint $table) {
-            $table->string('no_inv')->nullable()->after('id')->unique();
+            $table->dateTime('tanggal_pelunasan')
+                  ->nullable()
+                  ->after('payment_date')
+                  ->comment('Tanggal ketika pembayaran dinyatakan lunas');
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('pembayaran_spps', function (Blueprint $table) {
-            $table->dropColumn('no_inv');
+            $table->dropColumn('tanggal_pelunasan');
         });
     }
-}
+};

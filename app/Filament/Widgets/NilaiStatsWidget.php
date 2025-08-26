@@ -56,7 +56,8 @@ class NilaiStatsWidget extends BaseWidget
         // Completion percentage
         $completionPercentage = $nilaiPeriodeAktif > 0 ?
             round(($nilaiLengkap / $nilaiPeriodeAktif) * 100, 1) : 0;
-
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
         return [
             Stat::make('Total Penilaian', $totalNilai)
                 ->description('Seluruh penilaian di sistem')
@@ -66,9 +67,9 @@ class NilaiStatsWidget extends BaseWidget
                     'class' => 'cursor-pointer',
                 ])
                 ->url(
-                Auth::user()?->isAdmin()
+                $user?->isAdmin()
                     ? route('filament.admin.resources.nilais.index')
-                        : route('filament.admin.resources.guru-nilais.index')
+                    : route('filament.admin.resources.guru-nilais.index')
                 )
                 ->chart($this->getNilaiChart()),
 
@@ -79,7 +80,7 @@ class NilaiStatsWidget extends BaseWidget
                 ->extraAttributes([
                     'class' => 'cursor-pointer',
                 ])
-                ->url(Auth::user()?->isAdmin() ? route('filament.admin.resources.nilais.index', [
+                ->url($user?->isAdmin() ? route('filament.admin.resources.nilais.index', [
                     'tableFilters' => $activePeriode ? [
                         'periode_id' => ['values' => [$activePeriode->id]]
                     ] : []
@@ -98,7 +99,7 @@ class NilaiStatsWidget extends BaseWidget
                 ->extraAttributes([
                     'class' => 'cursor-pointer',
                 ])
-                ->url(Auth::user()?->isAdmin() ? route('filament.admin.resources.nilais.index', [
+                ->url($user?->isAdmin() ? route('filament.admin.resources.nilais.index', [
                     'tableFilters' => ['complete_nilai' => true]
                 ])
                     : route('filament.admin.resources.guru-nilais.index', [
@@ -112,7 +113,7 @@ class NilaiStatsWidget extends BaseWidget
                 ->extraAttributes([
                     'class' => 'cursor-pointer',
                 ])
-                ->url(Auth::user()?->isAdmin() ? route('filament.admin.resources.nilais.index', [
+                ->url($user?->isAdmin() ? route('filament.admin.resources.nilais.index', [
                     'tableFilters' => ['has_photos' => true]
                 ])
                     : route('filament.admin.resources.guru-nilais.index', [

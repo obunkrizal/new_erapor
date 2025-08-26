@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('tanggal')->nullable();
             $table->string('sakit')->nullable(); // e.g., 'hadir', 'sakit', 'izin', 'alfa'
             $table->string('izin')->nullable(); // e.g., 'hadir', 'sakit', 'izin', 'alfa'
-            $table->string('tanpa_keterangangan')->nullable(); // e.g., 'hadir', 'sakit', 'izin', 'alfa'
+            $table->string('tanpa_keterangan')->nullable(); // e.g., 'hadir', 'sakit', 'izin', 'alfa'
             $table->text('catatan')->nullable();
             $table->timestamps();
         });

@@ -3,11 +3,12 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Siswa;
-use App\Models\KelasSiswa;
 use App\Models\Periode;
-use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use Filament\Widgets\StatsOverviewWidget\Stat;
+use App\Models\KelasSiswa;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 
 class SiswaStatsWidget extends BaseWidget
 {
@@ -16,7 +17,9 @@ class SiswaStatsWidget extends BaseWidget
 
     public static function canView(): bool
     {
-        return auth()->user()->isAdmin();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        return $user && $user->isAdmin();
     }
     protected function getStats(): array
     {

@@ -44,16 +44,15 @@ class PembayaranSppResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+
     public static function shouldRegisterNavigation(): bool
     {
-        return true;
+        return false;
     }
 
     public static function canAccess(): bool
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-        return $user && $user->isAdmin();
+        return false;
     }
 
     public static function form(Form $form): Form
@@ -325,7 +324,8 @@ class PembayaranSppResource extends Resource
 
                 TextColumn::make('kelas.nama_kelas')
                     ->label('Kelas')
-                    ->searchable()
+                ->description(fn($record) => 'Nominal SPP: Rp ' . number_format($record->nominal, 0, ',', '.'))
+                ->searchable()
                     ->sortable()
                     ->toggleable(),
 
@@ -338,6 +338,9 @@ class PembayaranSppResource extends Resource
                 TextColumn::make('amount')
                     ->label('Jumlah Pembayaran')
                     ->money('idr', true)
+
+                ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.'))
+                ->extraAttributes(['class' => 'font-semibold'])
                     ->sortable(),
 
                 TextColumn::make('month')
@@ -420,7 +423,9 @@ class PembayaranSppResource extends Resource
                     ->extraAttributes(['class' => 'font-semibold'])
                     ->sortable(),
 
-            ])
+
+
+        ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Status Pembayaran')
@@ -464,6 +469,33 @@ class PembayaranSppResource extends Resource
                         ->modalHeading('Hapus Data Pembayaran SPP')
                         ->modalDescription('Apakah Anda yakin ingin menghapus data pembayaran ini? Tindakan ini tidak dapat dibatalkan.')
                         ->modalSubmitActionLabel('Ya, Hapus'),
+
+                Tables\Actions\Action::make('createTagihanSisa')
+                    ->label('Buat Tagihan Sisa')
+                    ->icon('heroicon-o-document-plus')
+                    ->color('warning')
+                    ->visible(fn($record) => $record->perlu_ditagih)
+                    ->action(function ($record) {
+                        $tagihanSisa = $record->createTagihanSisa();
+
+                        if ($tagihanSisa) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Tagihan Sisa Berhasil Dibuat')
+                                ->body('Tagihan sisa pembayaran sebesar ' . $tagihanSisa->sisa_pembayaran_formatted . ' telah dibuat untuk siswa ' . $record->siswa->nama_lengkap)
+                                ->success()
+                                ->send();
+                        } else {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Tidak Perlu Tagihan Sisa')
+                                ->body('Pembayaran sudah lunas, tidak perlu dibuat tagihan sisa')
+                                ->warning()
+                                ->send();
+                        }
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Buat Tagihan Sisa Pembayaran')
+                    ->modalDescription('Apakah Anda yakin ingin membuat tagihan untuk sisa pembayaran yang belum lunas?')
+                    ->modalSubmitActionLabel('Ya, Buat Tagihan'),
                 ])
                     ->label('Aksi')
             ])
@@ -596,7 +628,7 @@ class PembayaranSppResource extends Resource
      * @param int|null $kelasId
      * @return float
      */
-    private static function getHargaSppForKelas(?int $periodeId, ?int $kelasId): float
+    public static function getHargaSppForKelas(?int $periodeId, ?int $kelasId): float
     {
         if (!$periodeId || !$kelasId) {
             return 0;

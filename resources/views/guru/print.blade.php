@@ -13,7 +13,7 @@
                 margin: 1cm;
             }
         }
-        
+
     </style>
 </head>
 
@@ -71,7 +71,7 @@
                             </tr>
                             <tr>
                                 <td class="label">NUPTK</td>
-                                <td class="value">{{ $guru->nuptk ?? '-' }}</td>
+                                <td class="value"><strong>{{ $guru->nuptk ?? '-' }}</strong></td>
                             </tr>
                             <tr>
                                 <td class="label">Agama</td>
@@ -89,10 +89,10 @@
                                 <td class="label">Tanggal Lahir</td>
                                 <td class="value">
                                     {{ $guru->tanggal_lahir ? $guru->tanggal_lahir->format('d F Y') : '' }}
-                                    <br>
+                                    {{-- <br>
                                     @if ($guru->tanggal_lahir)
                                         <small>Usia: ({{ $guru->tanggal_lahir->age }} tahun)</small>
-                                    @endif
+                                    @endif --}}
                                 </td>
                             </tr>
                             <tr>
@@ -108,7 +108,7 @@
                     <div class="column">
                         <table class="info-table">
                             <tr style="text-align: center">
-                                <p style="text-align: center">Qr Code</p>
+                                <p style="text-align: center">ScanMe!</p>
                                 <td style="color: #666; vertical-align: bottom; width: 100px; align:right;">
                                     <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($guru?->nama_guru) . '_ NIP: ' . $guru?->nip . '_ NUPTK: ' . $guru?->nuptk . '_' . $guru?->tempat_lahir . ', ' . Carbon\Carbon::parse($guru?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
                                         alt="barcode" width="65" />
@@ -181,7 +181,7 @@
                             @if ($sekolah->guru)
                                 {{ $sekolah->guru->nama_guru }}
                                 @if ($sekolah->guru->nip)
-                                    <br><small>NIP: {{ $sekolah->guru->nip }}</small>
+                                    <br><small>NUPTK: {{ $sekolah->guru->nuptk }}</small>
                                 @endif
                             @elseif($sekolah->kepala_sekolah)
                                 {{ $sekolah->kepala_sekolah }}

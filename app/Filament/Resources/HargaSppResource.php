@@ -32,9 +32,12 @@ class HargaSppResource extends Resource
 
     public static function canAccess(): bool
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-        return $user && $user->isAdmin();
+        return false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
     }
 
     public static function form(Form $form): Form

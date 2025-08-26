@@ -23,8 +23,9 @@
 @endphp
     <button class="print-button no-print" onclick="window.print()">🖨️ Print</button>
 
-    @if(isset($pembayaran->amount) && $pembayaran->amount > 0)
-    <div class="watermark">LUNAS</div>
+    @if($pembayaran->is_lunas || str_starts_with($pembayaran->no_inv, 'TAGIHAN'))
+        <div class="watermark">[LUNAS]</div>
+        <div class="watermark2">Terima Kasih</div>
     @endif
 
     <div class="container">
@@ -91,7 +92,7 @@
                     <div class="column">
                         <table class="info-table">
                             <tr style="text-align: center">
-                                <p style="text-align: center">Qr Code</p>
+                                <p style="text-align: center">ScanMe!</p>
                                 <td style="color: #666; vertical-align: bottom; width: 100px; align:right;">
                                     @if ($pembayaran->siswa)
                                         <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(
@@ -145,9 +146,78 @@
                     <td class="label">Catatan/ Keterangan</td>
                     <td class="value">{{ Ucwords($pembayaran->catatan  ?? '-') }}</td>
                 </tr>
+                <tr>
+                    <td class="label">Status</td>
+                    @if ($pembayaran->is_lunas)
+                        <td class="value" style="color: green; font-weight: bold;">LUNAS
+                            <br><span style="font-weight: normal; font-size: 0.9em;">(Lunas pada
+                                @if ($pembayaran->tanggal_pelunasan)
+                                    {{ Carbon\Carbon::parse($pembayaran->tanggal_pelunasan)->translatedFormat('d F Y') }}
+                                @else
+                                    {{ Carbon\Carbon::parse($pembayaran->updated_at)->translatedFormat('d F Y') }}
+                                @endif
+                            )</span>
+                        </td>
+                    @elseif (str_starts_with($pembayaran->no_inv, 'TAGIHAN') && $pembayaran->status == 'paid')
+                        <td class="value" style="color: green; font-weight: bold;">LUNAS
+                            <br><span style="font-weight: normal; font-size: 0.9em;">(Tagihan sisa pembayaran - Status otomatis lunas)</span>
+                        </td>
+                    @else
+                        <td class="value" style="color: red; font-weight: bold;">BELUM LUNAS
+                            <br><span style="font-weight: normal; font-size: 0.9em;">Sisa Pembayaran {{ formatRupiah($pembayaran->nominal - $pembayaran->amount) }} untuk bulan {{ $pembayaran->month }} - Silahkan segera membayar kekurangannya</span>
+                        </td>
+                    @endif
+                </tr>
             </table>
         </div>
 
+        <!-- Billing Information for Remaining Payments - Only show if payment is not complete and not a remaining payment for an already paid original -->
+        @php
+            $showBillingInfo = !$pembayaran->is_lunas && !$pembayaran->original_payment_id;
+
+            // If this is a remaining payment (tagihan sisa), check if the original payment is already lunas
+            if ($pembayaran->original_payment_id) {
+                $originalPayment = \App\Models\PembayaranSpp::find($pembayaran->original_payment_id);
+                if ($originalPayment && $originalPayment->is_lunas) {
+                    $showBillingInfo = false;
+                }
+            }
+        @endphp
+
+        @if ($showBillingInfo)
+        <div class="section" style="border: 2px solid #dc3545; background-color: #fff5f5;margin-top: 20px; padding: 10px;">
+            <div class="section-title" style="color: #dc3545; background-color: white;">⚠️ INFORMASI TAGIHAN SISA PEMBAYARAN</div>
+            <table class="info-table">
+                <tr>
+                    <td class="label" style="width: 40%;">Status Pembayaran</td>
+                    <td class="value" style="color: #dc3545; font-weight: bold;">
+                        BELUM LUNAS - PERLU DITAGIHKAN
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Nominal SPP Bulan {{ ucwords($pembayaran->month) }}</td>
+                    <td class="value">{{ formatRupiah($pembayaran->nominal) }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Jumlah yang Sudah Dibayar</td>
+                    <td class="value">{{ formatRupiah($pembayaran->amount) }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Sisa Pembayaran yang Perlu Ditagih</td>
+                    <td class="value" style="color: #dc3545; font-weight: bold;">
+                        {{ formatRupiah($pembayaran->sisa_pembayaran) }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Keterangan Tagihan</td>
+                    <td class="value">
+                        Sisa pembayaran untuk bulan {{ $pembayaran->month }} akan ditagihkan secara otomatis.
+                        Silakan hubungi administrasi sekolah untuk informasi lebih lanjut.
+                    </td>
+                </tr>
+            </table>
+        </div>
+        @endif
 
         @php
             use Illuminate\Support\Facades\Auth;
@@ -164,8 +234,8 @@
                         @if (isset($sekolah) && $sekolah)
                             @if ($sekolah->guru)
                                 {{ $sekolah->guru->nama_guru }}
-                                @if ($sekolah->guru->nip)
-                                    <br><small>NIP: {{ $sekolah->guru->nip }}</small>
+                                @if ($sekolah->guru->nuptk)
+                                    <br><small>NUPTK: {{ $sekolah->guru->nuptk }}</small>
                                 @endif
                             @elseif($sekolah->kepala_sekolah)
                                 {{ $sekolah->kepala_sekolah }}

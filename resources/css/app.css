@@ -10,7 +10,95 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
-/* Center Filament notifications */
+/* Modern CSS Enhancements */
+:root {
+    --primary-gradient: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+    --secondary-gradient: linear-gradient(135deg, #FB923C 0%, #EA580C 100%);
+    --accent-gradient: linear-gradient(135deg, #10B981 0%, #047857 100%);
+}
+
+/* Modern Filament Components */
+.filament-sidebar {
+    background: linear-gradient(180deg, #1F2937 0%, #111827 100%);
+}
+
+.filament-sidebar-header {
+    background: var(--primary-gradient);
+}
+
+.filament-main {
+    background: #F9FAFB;
+}
+
+/* Modern buttons and interactive elements */
+.filament-button {
+    transition: all 0.2s ease-in-out;
+    border-radius: 8px;
+}
+
+.filament-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.filament-button-primary {
+    background: var(--primary-gradient);
+    border: none;
+}
+
+.filament-button-secondary {
+    background: var(--secondary-gradient);
+    border: none;
+}
+
+/* Modern cards and panels */
+.filament-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.filament-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Modern form elements */
+.filament-forms-component {
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.filament-forms-component:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+/* Modern tables */
+.filament-table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.filament-table th {
+    background: var(--primary-gradient);
+    color: white;
+    font-weight: 600;
+}
+
+.filament-table tr:hover {
+    background-color: #F3F4F6;
+}
+
+/* Modern badges */
+.filament-badge {
+    border-radius: 16px;
+    font-weight: 500;
+    padding: 4px 12px;
+}
+
+/* Center Filament notifications with modern styling */
 .filament-notification-wrapper,
 .filament-notification {
     position: fixed !important;
@@ -20,4 +108,49 @@
     z-index: 9999 !important;
     width: auto !important;
     max-width: 90vw !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Modern loading states */
+.filament-loading {
+    background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .filament-sidebar {
+        background: #1F2937;
+    }
+
+    .filament-main {
+        padding: 1rem;
+    }
+
+    .filament-card {
+        margin: 0.5rem;
+    }
+}
+
+/* Dark mode support (if enabled in the future) */
+@media (prefers-color-scheme: dark) {
+    .filament-main {
+        background: #111827;
+    }
+
+    .filament-card {
+        background: #1F2937;
+        border-color: #374151;
+    }
 }

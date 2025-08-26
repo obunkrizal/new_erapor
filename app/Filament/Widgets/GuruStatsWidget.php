@@ -6,9 +6,10 @@ use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\Nilai;
 use App\Models\Periode;
-use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 
 class GuruStatsWidget extends BaseWidget
 {
@@ -16,7 +17,9 @@ class GuruStatsWidget extends BaseWidget
     protected static bool $isLazy = false;
     public static function canView(): bool
     {
-        return auth()->user()->isAdmin();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        return $user && $user->isAdmin();
     }
     protected function getStats(): array
     {

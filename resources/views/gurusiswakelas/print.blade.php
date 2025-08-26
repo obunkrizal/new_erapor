@@ -60,9 +60,10 @@
                 <div class="three-column">
                     <div class="column">
                         <table class="info-table">
-                            <tr>
+                           <tr>
                                 <td class="label">Nama Lengkap</td>
-                                <td class="value"><strong>{{ Str::upper($kelasSiswa->siswa->nama_lengkap) }}</strong></td>
+                                <td class="value" style="width: 100px;">
+                                    <strong>{{ Str::upper($kelasSiswa->siswa->nama_lengkap) }}</strong></td>
                             </tr>
                             <tr>
                                 <td class="label">NIS</td>
@@ -101,12 +102,12 @@
                         </table>
                     </div>
                     <div class="column">
-                        <table class="info-table">
+                        <table class="info-table" >
                             <tr style="text-align: center">
-                                <p style="text-align: center">Qr Code</p>
-                                <td style="color: #666; vertical-align: bottom; width: 100px; align:right;">
+                                <p style="text-align: center">ScanMe!</p>
+                                <td style="color: #666; vertical-align: bottom; width: 65px;">
                                     <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($kelasSiswa->siswa?->nama_lengkap) . '_ NIS: ' . $kelasSiswa->siswa?->nis . '_ NISN: ' . $kelasSiswa->siswa?->nisn . '_' . $kelasSiswa->siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($kelasSiswa->siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
-                                        alt="barcode" width="65" />
+                                        alt="barcode" width="65" style="border: 2px solid #000; padding: 5px;" />
                                 </td>
                             </tr>
 
@@ -238,9 +239,9 @@
                         @if (isset($sekolah) && $sekolah)
                             @if ($sekolah->guru)
                                 {{ $sekolah->guru->nama_guru }}
-                                @if ($sekolah->guru->nip)
-                                    <br><small>NIP: {{ $sekolah->guru->nip }}</small>
-                                @endif
+
+                                    <br><small>NUPTK: {{ $sekolah->guru->nuptk ?? '-' }}</small>
+
                             @elseif($sekolah->kepala_sekolah)
                                 {{ $sekolah->kepala_sekolah }}
                             @else

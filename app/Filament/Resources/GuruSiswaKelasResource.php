@@ -42,13 +42,16 @@ class GuruSiswaKelasResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Auth::user()?->isGuru() ?? false;
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        return $user?->isGuru() ?? false;
     }
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
+        $query = parent::getEloquentQuery();
 
         if (!$user || !$user->isGuru()) {
             return $query->whereRaw('1 = 0');
@@ -472,7 +475,8 @@ class GuruSiswaKelasResource extends Resource
                     ->label('Kelas')
                     ->relationship('kelas', 'nama_kelas', function (Builder $query) {
                         $user = Auth::user();
-                        if ($user && $user->isGuru() && $user->guru) {
+
+                        if ($user && $user->guru) {
                             $query->where('guru_id', $user->guru->id);
                         }
                     }),
@@ -581,6 +585,7 @@ class GuruSiswaKelasResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         $user = Auth::user();
+
         if (!$user || !$user->isGuru() || !$user->guru) {
             return null;
         }

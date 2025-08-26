@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Siswa - {{ $siswa->nama_lengkap }}</title>
 
-<!-- Main CSS File -->
+    <!-- Main CSS File -->
     <link href="{{ asset('css/filament/print/printpage.css') }}" rel="stylesheet">
     <style>
         @media print {
@@ -26,8 +26,8 @@
         <div class="header">
             <div class="header-left">
                 @if ($sekolah->logo)
-                    <img src="{{ Storage::disk('public')->url($sekolah->logo) }}" alt="Logo {{ $sekolah->nama_sekolah }}"
-                        class="header-logo">
+                    <img src="{{ Storage::disk('public')->url($sekolah->logo) }}"
+                        alt="Logo {{ $sekolah->nama_sekolah }}" class="header-logo">
                 @endif
                 <div class="header-info">
                     <h4>{{ Str::upper($sekolah->nama_sekolah) }}</h4>
@@ -56,7 +56,8 @@
                             <tr>
                                 <td class="label">Nama Lengkap</td>
                                 <td class="value" style="width: 100px;">
-                                    <strong>{{ Str::upper($siswa->nama_lengkap) }}</strong></td>
+                                    <strong>{{ Str::upper($siswa->nama_lengkap) }}</strong>
+                                </td>
                             </tr>
                             <tr>
                                 <td class="label">NIS</td>
@@ -116,7 +117,7 @@
                     </div>
                     <div>
                         <div>
-                            <p style="text-align: center">Qr Code</p>
+                            <p style="text-align: center">ScanMe!</p>
 
                             <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($siswa?->nama_lengkap) . '_ NIS: ' . $siswa?->nis . '_ NISN: ' . $siswa?->nisn . '_' . $siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
                                 alt="barcode" width="65" />
@@ -229,15 +230,12 @@
         <!-- Signature Section -->
         <div class="signature-section">
             <div class="student-photo">
-                @if ($siswa->foto)
-                    <img src="{{ Storage::disk('public')->url($siswa->foto) }}"
-                        alt="Foto {{ $siswa->nama_lengkap }}">
-                @else
+
                     <div class="no-photo">
                         <div>FOTO</div>
-                        <div>SISWA</div>
+                        <div>SISWA </div>
+                        <div>3x4</div>
                     </div>
-                @endif
             </div>
             <div class="signature-box">
                 <div>Mengetahui,</div>
@@ -258,7 +256,9 @@
                         @endif
 
                     </strong>
-                    <small style="margin-top: 0;">NIP: {{ $sekolah->guru->nip ?? '-' }}</small>
+
+                    <small style="margin-top: 0;">NUPTK: {{ $sekolah->guru->nuptk }}</small>
+
                 </div>
             </div>
 

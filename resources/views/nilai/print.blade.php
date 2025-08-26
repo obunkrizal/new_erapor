@@ -153,7 +153,7 @@
                     </div>
                     <div>
                         <div>
-                            <p style="text-align: center">Qr Code</p>
+                            <p style="text-align: center">ScanMe!</p>
 
                             <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($nilai->siswa?->nama_lengkap) . '_ NIS: ' . $nilai->siswa?->nis . '_ NISN: ' . $nilai->siswa?->nisn . '_' . $nilai->siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($nilai->siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
                                 alt="barcode" width="65" />
@@ -164,7 +164,7 @@
                 </div>
             </div>
         </div>
-        <h1 style="font-size:10pt;text-align:center;margin-bottom:1px">PENILAIAN HASIL BELAJAR PESERTA DIDIK</h1>
+        <h1 style="font-size:10pt;text-align:center;margin-bottom:10px;margin-top:10px">PENILAIAN HASIL BELAJAR PESERTA DIDIK</h1>
         <!-- Combined Information Sections -->
         <div class="section">
             <div class="section-title">Nilai Agama dan Budi Pekerti</div>
@@ -343,7 +343,7 @@
             <div class="section">
                 <div class="section-title">Refleksi Orang Tua/ Wali Murid</div>
                 <table class="info-table">
-                    <tr style="border-top: 2px solid #000;">
+                    <tr>
                         <td height="100" colspan="4" scope="col"
                             style="padding: 15px; vertical-align: top;font-size: 10pt">
                             <span>1. Apa yang sudah berkembang pada diri anak saya?</span>

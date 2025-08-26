@@ -53,37 +53,51 @@ class GuruResource extends Resource
     // Hide navigation for guru
     public static function shouldRegisterNavigation(): bool
     {
-        return Auth::user()?->isAdmin() ?? false;
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        return $user && $user->isAdmin();
     }
 
     // Control access - only admin can access
     public static function canAccess(): bool
     {
-        return Auth::user()?->isAdmin() ?? false;
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        return $user && $user->isAdmin();
     }
 
     public static function canCreate(): bool
     {
-        return Auth::user()?->isAdmin() ?? false;
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        return $user && $user->isAdmin();
     }
 
     public static function canEdit($record): bool
     {
-        return Auth::user()?->isAdmin() ?? false;
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        return $user && $user->isAdmin();
     }
 
     public static function canDelete($record): bool
     {
-        return Auth::user()?->isAdmin() ?? false;
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        return $user && $user->isAdmin();
     }
 
     public static function canDeleteAny(): bool
     {
-        return Auth::user()?->isAdmin() ?? false;
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        return $user && $user->isAdmin();
     }
 
     public static function form(Form $form): Form
     {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
         return $form
             ->schema([
                 Section::make('Akun User')
@@ -383,6 +397,8 @@ class GuruResource extends Resource
 
     public static function table(Table $table): Table
     {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
         return $table
             ->columns([
                 ImageColumn::make('foto')
@@ -476,7 +492,7 @@ class GuruResource extends Resource
                     ->color('info'),
                 Tables\Actions\EditAction::make()
                     ->color('warning')
-                    ->visible(fn() => Auth::user()?->isAdmin()),
+                    ->visible(fn() => $user?->isAdmin()),
                 Tables\Actions\Action::make('print')
                     ->label('Print')
                     ->icon('heroicon-o-printer')
@@ -488,7 +504,7 @@ class GuruResource extends Resource
                     ->modalHeading('Hapus Data Siswa')
                     ->modalDescription('Apakah Anda yakin ingin menghapus data siswa ini? Tindakan ini tidak dapat dibatalkan.')
                     ->modalSubmitActionLabel('Ya, Hapus')
-                    ->visible(fn() => Auth::user()?->isAdmin()),
+                    ->visible(fn() => $user?->isAdmin()),
                 ])
                 ->button()
                 ->size(ActionSize::Small)
@@ -499,9 +515,23 @@ class GuruResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn() => Auth::user()?->isAdmin()),
+                        ->visible(fn() => $user?->isAdmin()),
                 ]),
-            ]);
+            ])
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('Tambah Guru Pertama')
+                    ->icon('heroicon-m-plus'),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->striped()
+            ->paginated([10, 25, 50, 100])
+            ->poll('30s') // Auto refresh every 30 seconds
+            ->deferLoading()
+            ->persistSortInSession()
+            ->persistSearchInSession()
+            ->persistFiltersInSession()
+            ->extremePaginationLinks();
     }
 
     public static function getRelations(): array
@@ -523,7 +553,10 @@ class GuruResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        if (!Auth::user()?->isAdmin()) {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
+        if (!$user?->isAdmin()) {
             return null;
         }
 

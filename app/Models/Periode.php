@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Periode extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name',
+        'nama_periode',
         'tahun_ajaran',
         'semester',
         'is_active',
@@ -94,7 +95,7 @@ class Periode extends Model
      */
     public function getFullNameAttribute()
     {
-        return $this->name . ' (' . $this->tahun_ajaran . ')';
+        return $this->nama_periode . ' (' . $this->tahun_ajaran . ')';
     }
 
      public function kelas()

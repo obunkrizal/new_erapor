@@ -3,12 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Exports\SiswaImportTemplateExport;
 use Maatwebsite\Excel\Facades\Excel;
-
-Route::get('/generate-siswa-import-template', function () {
-    $filePath = public_path('templates/siswa_import_template.xlsx');
-    Excel::store(new SiswaImportTemplateExport, 'siswa_import_template.xlsx', 'public');
-    return "Siswa import template generated at: " . $filePath;
-});
 use App\Filament\Resources\SiswaResource\Pages\PrintReport;
 use App\Http\Controllers\PembayaranSppReportController;
 use App\Filament\Resources\NilaiResource\Pages\NilaiStats;
@@ -25,6 +19,11 @@ use App\Models\Sekolah;
 //     return view('home');
 // });
 
+Route::get('/generate-siswa-import-template', function () {
+    $filePath = public_path('templates/siswa_import_template.xlsx');
+    Excel::store(new SiswaImportTemplateExport, 'siswa_import_template.xlsx', 'public');
+    return "Siswa import template generated at: " . $filePath;
+});
 
 Route::get('/', function () {
     // Assuming you have a way to get school data

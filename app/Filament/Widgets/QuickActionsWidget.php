@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\Widget;
+use Illuminate\Support\Facades\Auth;
 
 class QuickActionsWidget extends Widget
 {
@@ -11,6 +12,8 @@ class QuickActionsWidget extends Widget
     protected int | string | array $columnSpan = 'full';
     public static function canView(): bool
     {
-        return auth()->user()->isAdmin();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        return $user && $user->isAdmin();
     }
 }

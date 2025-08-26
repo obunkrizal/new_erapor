@@ -14,7 +14,7 @@
             padding: 70px 1cm 1cm 1cm;
             background: white;
         }
-        
+
     </style>
 </head>
 
@@ -87,7 +87,7 @@
                             @if ($sekolah->guru)
                                 {{ $sekolah->guru->nama_guru }}
                                 @if ($sekolah->guru->nip)
-                                    <br /><small>NIP: {{ $sekolah->guru->nip }}</small>
+                                    <br /><small>NUPTK: {{ $sekolah->guru->nuptk }}</small>
                                 @endif
                             @elseif($sekolah->kepala_sekolah)
                                 {{ $sekolah->kepala_sekolah }}

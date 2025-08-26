@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'admin',
             'email' => 'admin@gmail.com',
             'password' => bcrypt('admin@123'),
+            'role' => 'admin',
         ]);
         $this->call([
             ProvincesSeeder::class,
