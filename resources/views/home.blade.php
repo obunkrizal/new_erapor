@@ -179,7 +179,7 @@
         }
 
         .notification-header.success {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            background: linear-gradient(135deg, #65d1d1 0%, #3878ef 100%);
         }
 
         .notification-header.error {

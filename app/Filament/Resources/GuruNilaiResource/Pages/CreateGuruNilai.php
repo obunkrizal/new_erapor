@@ -12,6 +12,7 @@ class CreateGuruNilai extends CreateRecord
 {
     protected static string $resource = GuruNilaiResource::class;
 
+    
     protected function getRedirectUrl(): string
     {
         // Option 1: Redirect to print page

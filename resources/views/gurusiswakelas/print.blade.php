@@ -106,7 +106,7 @@
                             <tr style="text-align: center">
                                 <p style="text-align: center">ScanMe!</p>
                                 <td style="color: #666; vertical-align: bottom; width: 65px;">
-                                    <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($kelasSiswa->siswa?->nama_lengkap) . '_ NIS: ' . $kelasSiswa->siswa?->nis . '_ NISN: ' . $kelasSiswa->siswa?->nisn . '_' . $kelasSiswa->siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($kelasSiswa->siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
+                                    <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($kelasSiswa->siswa?->nama_lengkap) . '_ NIS: ' . $kelasSiswa->siswa?->nis . '_ NISN: ' . $kelasSiswa->siswa?->nisn . '_'. ($kelasSiswa->siswa?->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') . ' ' . $kelasSiswa->siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($kelasSiswa->siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
                                         alt="barcode" width="65" style="border: 2px solid #000; padding: 5px;" />
                                 </td>
                             </tr>

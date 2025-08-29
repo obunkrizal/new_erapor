@@ -11,6 +11,7 @@ class CreateGuru extends CreateRecord
 {
     protected static string $resource = GuruResource::class;
 
+    
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Handle user account creation

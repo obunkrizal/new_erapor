@@ -5,15 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Guru- {{ $guru->nama_guru }}</title>
-     <link href="{{ asset('css/filament/print/printpage.css') }}" rel="stylesheet">
-     <style>
+    <link href="{{ asset('css/filament/print/printpage.css') }}" rel="stylesheet">
+    <style>
         @media print {
             @page {
                 size: A4;
                 margin: 1cm;
             }
         }
-
     </style>
 </head>
 
@@ -25,8 +24,8 @@
         <div class="header">
             <div class="header-left">
                 @if ($sekolah->logo)
-                    <img src="{{ Storage::disk('public')->url($sekolah->logo) }}" alt="Logo {{ $sekolah->nama_sekolah }}"
-                        class="header-logo">
+                    <img src="{{ Storage::disk('public')->url($sekolah->logo) }}"
+                        alt="Logo {{ $sekolah->nama_sekolah }}" class="header-logo">
                 @endif
                 <div class="header-info">
                     <h4>{{ Str::upper($sekolah->nama_sekolah) }}</h4>
@@ -39,7 +38,7 @@
             </div>
             <div class="header-right" style="text-align: right">
                 <h1>Data Guru</h1>
-                <h2>Sistem Informasi Akademik {{$sekolah->nama_sekolah}} <br>TA: {{$periode->tahun_ajaran}}</h2>
+                <h2>Sistem Informasi Akademik {{ $sekolah->nama_sekolah }} <br>TA: {{ $periode->tahun_ajaran }}</h2>
             </div>
         </div>
 
@@ -110,8 +109,25 @@
                             <tr style="text-align: center">
                                 <p style="text-align: center">ScanMe!</p>
                                 <td style="color: #666; vertical-align: bottom; width: 100px; align:right;">
-                                    <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($guru?->nama_guru) . '_ NIP: ' . $guru?->nip . '_ NUPTK: ' . $guru?->nuptk . '_' . $guru?->tempat_lahir . ', ' . Carbon\Carbon::parse($guru?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
-                                        alt="barcode" width="65" />
+                                    <img src="data:image/png;base64,
+                                    {{ DNS2D::getBarcodePNG(
+                                        STR::upper($guru?->nama_guru) .
+                                            '_ NIP: ' .
+                                            $guru?->nip .
+                                            '_ NUPTK: ' .
+                                            $guru?->nuptk .
+                                            ', JK: ' .
+                                            ($guru?->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') .
+                                            ',' .
+                                            $guru?->tempat_lahir .
+                                            ', ' .
+                                            Carbon\Carbon::parse($guru?->tanggal_lahir)->translatedFormat('d F Y'),
+                                        'QRCODE',
+                                        3,
+                                        3,
+                                    ) }}"
+                                    alt="barcode"
+                                        width="65" />
                                 </td>
                             </tr>
 

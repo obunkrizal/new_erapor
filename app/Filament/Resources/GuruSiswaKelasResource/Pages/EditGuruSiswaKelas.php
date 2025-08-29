@@ -9,4 +9,8 @@ use Filament\Resources\Pages\EditRecord;
 class EditGuruSiswaKelas extends EditRecord
 {
     protected static string $resource = GuruSiswaKelasResource::class;
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreatePindahKelas extends CreateRecord
 {
     protected static string $resource = PindahKelasResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

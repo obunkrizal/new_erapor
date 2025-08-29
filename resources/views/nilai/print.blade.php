@@ -155,7 +155,7 @@
                         <div>
                             <p style="text-align: center">ScanMe!</p>
 
-                            <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($nilai->siswa?->nama_lengkap) . '_ NIS: ' . $nilai->siswa?->nis . '_ NISN: ' . $nilai->siswa?->nisn . '_' . $nilai->siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($nilai->siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
+                            <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($nilai->siswa?->nama_lengkap) . '_ NIS: ' . $nilai->siswa?->nis . '_ NISN: ' . $nilai->siswa?->nisn . '_' . ($nilai->siswa?->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') . ' ' . $nilai->siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($nilai->siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
                                 alt="barcode" width="65" />
 
                         </div>

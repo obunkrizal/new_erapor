@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateDataMedisSiswa extends CreateRecord
 {
     protected static string $resource = DataMedisSiswaResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

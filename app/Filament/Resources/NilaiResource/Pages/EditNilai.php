@@ -12,6 +12,10 @@ class EditNilai extends EditRecord
 {
     protected static string $resource = NilaiResource::class;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
     public function mount(int | string $record): void
     {
         // Redirect admin away from edit page

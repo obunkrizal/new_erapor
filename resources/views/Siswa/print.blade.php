@@ -105,7 +105,7 @@
                             <tr style="text-align: center">
                                 <p style="text-align: center">Qr Code</p>
                                 <td style="color: #666; vertical-align: bottom; width: 100px; align:right;">
-                                    <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($siswa?->nama_lengkap) . '_ NIS: ' . $siswa?->nis . '_ NISN: ' . $siswa?->nisn . '_' . $siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
+                                    <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($siswa?->nama_lengkap) . '_ NIS: ' . $siswa?->nis . '_ NISN: ' . $siswa?->nisn . '_'. ($siswa?->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') . ' ' . $siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
                                         alt="barcode" width="65" />
                                 </td>
                             </tr>
