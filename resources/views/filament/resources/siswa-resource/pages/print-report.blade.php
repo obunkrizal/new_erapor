@@ -45,6 +45,7 @@
             <table class="info-table">
                 <thead>
                     <tr class="section-title" style="text-align: center; font-size:7pt">
+                        <th>No.</th>
                         <th>NIS / NISN</th>
                         <th>Nama Lengkap</th>
                         <th>Tempat, Tanggal Lahir</th>
@@ -60,8 +61,15 @@
                     @if (!empty($siswas) && $siswas->count())
                         @foreach ($siswas as $siswa)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $siswa->nis }} / {{ $siswa->nisn }} </td>
-                                <td>{{ $siswa->nama_lengkap }}</td>
+                                <td>
+                                    <div>
+                                        {{ $siswa->nama_lengkap }}
+                                        <br>
+                                        <small class="text-bold">{{ $siswa->kk }}</small>
+                                    </div>
+                                </td>
                                 <td>{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir?->format('d M Y ') }}</td>
                                 <td>{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
                                 <td>{{ $siswa->agama }}</td>
@@ -98,9 +106,9 @@
                         @if (isset($sekolah) && $sekolah)
                             @if ($sekolah->guru)
                                 {{ $sekolah->guru->nama_guru }}
-                                @if ($sekolah->guru->nuptk)
+
                                     <br><small>NUPTK: {{ $sekolah->guru->nuptk ?? '-' }}</small>
-                                @endif
+                               
                             @elseif($sekolah->kepala_sekolah)
                                 {{ $sekolah->kepala_sekolah }}
                             @else
