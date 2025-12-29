@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\User;
 use App\Models\Nilai;
 use App\Models\Absensi;
 use App\Models\Periode;
@@ -107,7 +108,7 @@ class GuruSummaryWidget extends BaseWidget
         $totalMedicalRecords = DataMedisSiswa::where('periode_id', $activePeriode->id)->count();
         $totalAssessments = Nilai::where('periode_id', $activePeriode->id)->count();
 
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return [
             Stat::make('Total Laporan', $totalReports)

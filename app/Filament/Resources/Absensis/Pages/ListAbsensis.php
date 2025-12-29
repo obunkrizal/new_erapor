@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\AbsensiResource\Pages;
+namespace App\Filament\Resources\Absensis\Pages;
 
-use App\Filament\Resources\AbsensiResource;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\Absensis\AbsensiResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -13,7 +14,7 @@ class ListAbsensis extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
+            CreateAction::make()
                 ->label('Tambah Absensi')
                 ->color('primary')
                 ->icon('heroicon-o-document-plus'),

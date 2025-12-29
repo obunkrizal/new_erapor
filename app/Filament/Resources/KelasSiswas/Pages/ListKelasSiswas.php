@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\KelasSiswaResource\Pages;
+namespace App\Filament\Resources\KelasSiswas\Pages;
 
-use App\Filament\Resources\KelasSiswaResource;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\KelasSiswas\KelasSiswaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -13,7 +14,7 @@ class ListKelasSiswas extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

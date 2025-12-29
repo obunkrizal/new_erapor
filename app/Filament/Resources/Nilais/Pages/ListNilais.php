@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Filament\Resources\NilaiResource\Pages;
+namespace App\Filament\Resources\Nilais\Pages;
 
-use App\Filament\Resources\NilaiResource;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Tabs\Tab;
+use App\Filament\Resources\Nilais\NilaiResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
-use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListNilais extends ListRecords
@@ -17,7 +18,7 @@ class ListNilais extends ListRecords
     {
         // Redirect non-admin users
         if (!Auth::user()->isAdmin()) {
-            \Filament\Notifications\Notification::make()
+            Notification::make()
                 ->title('Akses Ditolak')
                 ->body('Hanya admin yang dapat mengakses halaman ini.')
                 ->warning()

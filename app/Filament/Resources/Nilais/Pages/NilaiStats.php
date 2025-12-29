@@ -1,23 +1,25 @@
 <?php
 
-namespace App\Filament\Resources\NilaiResource\Pages;
+namespace App\Filament\Resources\Nilais\Pages;
 
-use App\Filament\Resources\NilaiResource\Widgets\NilaiStatsWidget;
+use App\Filament\Resources\Nilais\NilaiResource;
+use Illuminate\View\View;
+use App\Filament\Resources\Nilais\Widgets\NilaiStatsWidget;
 use Filament\Resources\Pages\Page;
 
 class NilaiStats extends Page
 {
-    protected static string $resource = \App\Filament\Resources\NilaiResource::class;
+    protected static string $resource = NilaiResource::class;
 
     protected static ?string $navigationLabel = 'Statistik Penilaian';
     protected static ?string $title = 'Statistik Penilaian Siswa';
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chart-bar';
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('filament.resources.nilai-resource.pages.nilai-stats', [
             'widgets' => [
-                \App\Filament\Resources\NilaiResource\Widgets\NilaiStatsWidget::class,
+                NilaiStatsWidget::class,
             ],
         ]);
     }

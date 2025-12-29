@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\KelasResource\Pages;
+namespace App\Filament\Resources\Kelas\Pages;
 
-use App\Filament\Resources\KelasResource;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\Kelas\KelasResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -13,7 +14,7 @@ class EditKelas extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 

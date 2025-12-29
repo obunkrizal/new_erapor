@@ -1,27 +1,50 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\Users;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\Pages\CreateUser;
+use App\Filament\Resources\Users\Pages\ViewUser;
+use App\Filament\Resources\Users\Pages\EditUser;
 use Filament\Forms;
 use App\Models\User;
 use Filament\Tables;
-use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\UserResource\Pages;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationLabel = 'Manajemen User';
     protected static ?string $modelLabel = 'User';
     protected static ?string $pluralModelLabel = 'Manajemen User';
-    protected static ?string $navigationGroup = 'Pengaturan';
+    protected static string | \UnitEnum | null $navigationGroup = 'Pengaturan';
     protected static ?int $navigationSort = 5;
 
     // Hide navigation from guru - only show for admin
@@ -36,23 +59,23 @@ class UserResource extends Resource
         return Auth::user()?->isAdmin() ?? false;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Informasi User')
+        return $schema
+            ->components([
+                Section::make('Informasi User')
                     ->description('Data dasar pengguna sistem')
                     ->icon('heroicon-o-user')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('name')
+                                TextInput::make('name')
                                     ->label('Nama Lengkap')
                                     ->required()
                                     ->maxLength(255)
                                     ->placeholder('Masukkan nama lengkap'),
 
-                                Forms\Components\TextInput::make('email')
+                                TextInput::make('email')
                                     ->label('Email')
                                     ->email()
                                     ->required()
@@ -60,7 +83,7 @@ class UserResource extends Resource
                                     ->unique(ignoreRecord: true)
                                     ->placeholder('Masukkan email'),
 
-                                Forms\Components\Select::make('role')
+                                Select::make('role')
                                     ->label('Role')
                                     ->options([
                                         'admin' => 'Admin',
@@ -71,7 +94,7 @@ class UserResource extends Resource
                                     ->native(false)
                                     ->placeholder('Pilih role'),
 
-                                Forms\Components\TextInput::make('password')
+                                TextInput::make('password')
                                     ->label('Password')
                                     ->password()
                                     ->required(fn(string $context): bool => $context === 'create')
@@ -81,7 +104,7 @@ class UserResource extends Resource
                                     ->placeholder('Masukkan password')
                                     ->helperText('Minimal 8 karakter'),
 
-                                Forms\Components\DateTimePicker::make('email_verified_at')
+                                DateTimePicker::make('email_verified_at')
                                     ->label('Email Verified At')
                                     ->displayFormat('d/m/Y H:i')
                                     ->placeholder('Pilih tanggal verifikasi')
@@ -89,16 +112,16 @@ class UserResource extends Resource
                             ]),
                     ]),
 
-                Forms\Components\Section::make('Status User')
+                Section::make('Status User')
                     ->description('Status dan pengaturan akun')
                     ->icon('heroicon-o-shield-check')
                     ->schema([
-                        Forms\Components\Toggle::make('is_active')
+                        Toggle::make('is_active')
                             ->label('Status Aktif')
                             ->default(true)
                             ->helperText('Nonaktifkan untuk melarang user login'),
 
-                        Forms\Components\Textarea::make('notes')
+                        Textarea::make('notes')
                             ->label('Catatan')
                             ->maxLength(500)
                             ->rows(3)
@@ -113,20 +136,20 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label('Nama')
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
 
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
                     ->sortable()
                     ->copyable()
                     ->copyMessage('Email berhasil disalin!'),
 
-                Tables\Columns\TextColumn::make('role')
+                TextColumn::make('role')
                     ->label('Role')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -143,7 +166,7 @@ class UserResource extends Resource
                     })
                     ->sortable(),
 
-                Tables\Columns\IconColumn::make('email_verified_at')
+                IconColumn::make('email_verified_at')
                     ->label('Email Verified')
                     ->boolean()
                 ->trueIcon('heroicon-o-check-circle')
@@ -152,7 +175,7 @@ class UserResource extends Resource
                 ->falseColor('danger')
                     ->sortable(),
 
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->label('Status')
                     ->boolean()
                 ->trueIcon('heroicon-o-check-circle')
@@ -161,20 +184,20 @@ class UserResource extends Resource
                 ->falseColor('danger')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label('Diperbarui')
                     ->dateTime('d M Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('role')
+                SelectFilter::make('role')
                     ->label('Role')
                     ->options([
                         'admin' => 'Admin',
@@ -183,27 +206,27 @@ class UserResource extends Resource
                     ])
                     ->native(false),
 
-                Tables\Filters\TernaryFilter::make('email_verified_at')
+                TernaryFilter::make('email_verified_at')
                     ->label('Email Verified')
                     ->nullable(),
 
-                Tables\Filters\TernaryFilter::make('is_active')
+                TernaryFilter::make('is_active')
                     ->label('Status Aktif')
                     ->default(true),
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
 
-                Tables\Actions\Action::make('verify_email')
+                Action::make('verify_email')
                     ->label('Verifikasi Email')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->action(function (User $record) {
                         $record->update(['email_verified_at' => now()]);
 
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Email berhasil diverifikasi')
                             ->success()
                             ->send();
@@ -211,12 +234,12 @@ class UserResource extends Resource
                     ->requiresConfirmation()
                     ->visible(fn(User $record): bool => !$record->email_verified_at),
 
-                Tables\Actions\Action::make('reset_password')
+                Action::make('reset_password')
                     ->label('Reset Password')
                     ->icon('heroicon-o-key')
                     ->color('warning')
-                    ->form([
-                        Forms\Components\TextInput::make('password')
+                    ->schema([
+                        TextInput::make('password')
                             ->label('Password Baru')
                             ->password()
                             ->required()
@@ -226,28 +249,28 @@ class UserResource extends Resource
                     ->action(function (User $record, array $data) {
                         $record->update(['password' => Hash::make($data['password'])]);
 
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Password berhasil direset')
                             ->success()
                             ->send();
                     })
                     ->requiresConfirmation(),
 
-                Tables\Actions\Action::make('toggle_status')
+                Action::make('toggle_status')
                     ->label(fn(User $record): string => $record->is_active ? 'Nonaktifkan' : 'Aktifkan')
                     ->icon(fn(User $record): string => $record->is_active ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
                     ->color(fn(User $record): string => $record->is_active ? 'danger' : 'success')
                     ->action(function (User $record) {
                         $record->update(['is_active' => !$record->is_active]);
 
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Status user berhasil diubah')
                             ->success()
                             ->send();
                     })
                     ->requiresConfirmation(),
 
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->requiresConfirmation()
                     ->modalHeading('Hapus User')
                     ->modalDescription('Apakah Anda yakin ingin menghapus user ini?')
@@ -258,50 +281,50 @@ class UserResource extends Resource
                 ->color('gray')
                 ->button(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('verify_emails')
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('verify_emails')
                         ->label('Verifikasi Email')
                         ->icon('heroicon-o-check-badge')
                         ->color('success')
                         ->action(function ($records) {
                             $records->each(fn($record) => $record->update(['email_verified_at' => now()]));
 
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title(count($records) . ' email berhasil diverifikasi')
                                 ->success()
                                 ->send();
                         })
                         ->requiresConfirmation(),
 
-                    Tables\Actions\BulkAction::make('activate_users')
+                    BulkAction::make('activate_users')
                         ->label('Aktifkan User')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->action(function ($records) {
                             $records->each(fn($record) => $record->update(['is_active' => true]));
 
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title(count($records) . ' user berhasil diaktifkan')
                                 ->success()
                                 ->send();
                         }),
 
-                    Tables\Actions\BulkAction::make('deactivate_users')
+                    BulkAction::make('deactivate_users')
                         ->label('Nonaktifkan User')
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
                         ->action(function ($records) {
                             $records->each(fn($record) => $record->update(['is_active' => false]));
 
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title(count($records) . ' user berhasil dinonaktifkan')
                                 ->success()
                                 ->send();
                         })
                         ->requiresConfirmation(),
 
-                    Tables\Actions\DeleteBulkAction::make(),
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
@@ -310,10 +333,10 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'view' => Pages\ViewUser::route('/{record}'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
+            'view' => ViewUser::route('/{record}'),
+            'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 

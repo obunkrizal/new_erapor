@@ -24,8 +24,8 @@
         <div class="header">
             <div class="header-left">
                 @if ($sekolah->logo)
-                    <img src="{{ Storage::disk('public')->url($sekolah->logo) }}" alt="Logo {{ $sekolah->nama_sekolah }}"
-                        class="header-logo">
+                    <img src="{{ Storage::disk('public')->url($sekolah->logo) }}"
+                        alt="Logo {{ $sekolah->nama_sekolah }}" class="header-logo">
                 @endif
                 <div class="header-info">
                     <h4>{{ Str::upper($sekolah->nama_sekolah) }}</h4>
@@ -38,7 +38,7 @@
             </div>
             <div class="header-right" style="text-align: right">
                 <h1>Data Siswa</h1>
-               <h2>Sistem Informasi Akademik {{$sekolah->nama_sekolah}} <br>TA: {{$periode->tahun_ajaran}}</h2>
+                <h2>Sistem Informasi Akademik {{ $sekolah->nama_sekolah }} <br>TA: {{ $periode->tahun_ajaran }}</h2>
             </div>
         </div>
 
@@ -100,19 +100,7 @@
                             </tr>
                         </table>
                     </div>
-                    <div class="column">
-                        <table class="info-table">
-                            <tr style="text-align: center">
-                                <p style="text-align: center">Qr Code</p>
-                                <td style="color: #666; vertical-align: bottom; width: 100px; align:right;">
-                                    <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($siswa?->nama_lengkap) . '_ NIS: ' . $siswa?->nis . '_ NISN: ' . $siswa?->nisn . '_'. ($siswa?->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') . ' ' . $siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
-                                        alt="barcode" width="65" />
-                                </td>
-                            </tr>
 
-
-                        </table>
-                    </div>
                 </div>
             </div>
         </div>
@@ -131,7 +119,8 @@
                 </tr>
                 <tr>
                     <td class="label">Berat Badan & Tinggi Badan</td>
-                    <td class="value">{{ $datamedis->berat_badan ?? '-' }} KG / {{$datamedis->tinggi_badan ?? '-'}} CM</td>
+                    <td class="value">{{ $datamedis->berat_badan ?? '-' }} KG / {{ $datamedis->tinggi_badan ?? '-' }}
+                        CM</td>
                 </tr>
                 <tr>
                     <td class="label">Golongan Darah</td>
@@ -171,10 +160,10 @@
                             <td class="label">Pendidikan Ibu</td>
                             <td class="value">{{ $siswa->pendidikan_ibu ?? '-' }}</td>
                         </tr>
-                         <tr>
-                    <td class="label">Nomor Telepon</td>
-                    <td class="value">{{ $siswa->telepon ?? '-' }}</td>
-                </tr>
+                        <tr>
+                            <td class="label">Nomor Telepon</td>
+                            <td class="value">{{ $siswa->telepon ?? '-' }}</td>
+                        </tr>
                     </table>
                 </div>
 
@@ -278,6 +267,13 @@
                     </strong>
                 </div>
             </div>
+        </div>
+        <div>
+
+            <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($siswa?->nama_lengkap) . '_ NIS: ' . $siswa?->nis . '_ NISN: ' . $siswa?->nisn . '_' . ($siswa?->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') . ' ' . $siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
+                alt="barcode" width="65" />
+
+
         </div>
         <!-- Print Information -->
         <div class="print-info">

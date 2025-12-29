@@ -1,8 +1,12 @@
 <?php
 
-namespace App\Filament\Resources\NilaiResource\Pages;
+namespace App\Filament\Resources\Nilais\Pages;
 
-use App\Filament\Resources\NilaiResource;
+use Filament\Actions\Action;
+use Filament\Forms\Components\DatePicker;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\Nilais\NilaiResource;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Resources\Pages\ViewRecord;
@@ -24,12 +28,12 @@ class ViewNilai extends ViewRecord
         //     ->url(fn (): string => route('nilai.print', ['nilai' => $this->record]))
         //     ->openUrlInNewTab();
 
-        $actions[] = Actions\Action::make('select_date')
+        $actions[] = Action::make('select_date')
             ->label('Pilih Tanggal Tanda Tangan')
             ->icon('heroicon-o-calendar')
             ->color('primary')
-            ->form([
-                Forms\Components\DatePicker::make('signature_date')
+            ->schema([
+                DatePicker::make('signature_date')
                     ->label('Tanggal Tanda Tangan')
                     ->native(false)
                     ->required()
@@ -44,13 +48,13 @@ class ViewNilai extends ViewRecord
 
         // Only show edit/delete if not admin
         if (!Auth::user()?->isAdmin()) {
-            $actions[] = Actions\EditAction::make();
-            $actions[] = Actions\DeleteAction::make();
+            $actions[] = EditAction::make();
+            $actions[] = DeleteAction::make();
         }
 
         // Show info action for admin
         if (Auth::user()?->isAdmin()) {
-            $actions[] = Actions\Action::make('info')
+            $actions[] = Action::make('info')
                 ->label('Info')
                 ->icon('heroicon-o-information-circle')
                 ->color('info')

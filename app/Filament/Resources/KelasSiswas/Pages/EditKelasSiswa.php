@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\KelasSiswaResource\Pages;
+namespace App\Filament\Resources\KelasSiswas\Pages;
 
+use Filament\Actions\ViewAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions;
 use Illuminate\Support\Facades\Log;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use App\Filament\Resources\KelasSiswaResource;
+use App\Filament\Resources\KelasSiswas\KelasSiswaResource;
 
 class EditKelasSiswa extends EditRecord
 {
@@ -15,8 +17,8 @@ class EditKelasSiswa extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 

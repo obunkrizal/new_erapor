@@ -64,11 +64,11 @@ class User extends Authenticatable
     // Relationships
     public function guru()
     {
-        return $this->hasOne(\App\Models\Guru::class, 'user_id');
+        return $this->hasOne(Guru::class, 'user_id');
     }
 
     public function siswa()
     {
-        return $this->hasOne(\App\Models\Siswa::class, 'user_id');
+        return $this->hasOne(Siswa::class, 'user_id');
     }
 }

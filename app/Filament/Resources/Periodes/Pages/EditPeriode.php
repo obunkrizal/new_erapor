@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\PeriodeResource\Pages;
+namespace App\Filament\Resources\Periodes\Pages;
 
-use App\Filament\Resources\PeriodeResource;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\Periodes\PeriodeResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -18,7 +19,7 @@ class EditPeriode extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

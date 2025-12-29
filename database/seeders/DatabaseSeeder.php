@@ -35,6 +35,8 @@ class DatabaseSeeder extends Seeder
             GuruSeeder::class,
             PeriodeSeeder::class,
             SuratKeputusanGuruSeeder::class,
+            PaudDimensiIndikatorSeeder::class,
+            PaudEkstrakurikulerSeeder::class, // PaudEkstrakurikulerSeeder::class,
         ]);
     }
 }

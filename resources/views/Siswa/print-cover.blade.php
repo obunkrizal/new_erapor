@@ -115,16 +115,7 @@
                             </tr>
                         </table>
                     </div>
-                    <div>
-                        <div>
-                            <p style="text-align: center">ScanMe!</p>
 
-                            <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($siswa?->nama_lengkap) . '_ NIS: ' . $siswa?->nis . '_ NISN: ' . $siswa?->nisn . '_'. ($siswa?->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') . ' '. $siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
-                                alt="barcode" width="65" />
-
-                        </div>
-
-                    </div>
                 </div>
             </div>
         </div>
@@ -263,10 +254,20 @@
             </div>
 
         </div>
+        <div>
+                        <div>
+
+                            <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($siswa?->nama_lengkap) . '_ NIS: ' . $siswa?->nis . '_ NISN: ' . $siswa?->nisn . '_'. ($siswa?->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') . ' '. $siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
+                                alt="barcode" width="65" />
+
+                        </div>
+
+                    </div>
         <!-- Print Information -->
         <div class="print-info">
-            <p>Dicetak pada: {{ now()->format('d F Y, H:i:s') }} WIB</p>
-            <p>Dokumen ini dicetak secara otomatis oleh sistem</p>
+
+                {{ Str::upper($siswa->nama_lengkap) }}_{{ $nilai->siswa->nis ?? '-' }}
+                /{{ $siswa->nisn ?? '-' }}
         </div>
     </div>
 
@@ -383,7 +384,7 @@
             border-top: 1px solid #ddd;
             font-size: 9px;
             color: #999;
-            text-align: center;
+            text-align: left;
             page-break-inside: avoid;
         }
 

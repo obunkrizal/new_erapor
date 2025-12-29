@@ -1,13 +1,32 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\HargaSpps;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\HargaSpps\Pages\ListHargaSpps;
+use App\Filament\Resources\HargaSpps\Pages\CreateHargaSpp;
+use App\Filament\Resources\HargaSpps\Pages\EditHargaSpp;
 use App\Filament\Resources\HargaSppResource\Pages;
 use App\Models\HargaSpp;
 use App\Models\Periode;
 use App\Models\Kelas;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -18,7 +37,7 @@ class HargaSppResource extends Resource
 {
     protected static ?string $model = HargaSpp::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-currency-dollar';
 
     protected static ?string $navigationLabel = 'Harga SPP';
 
@@ -26,9 +45,9 @@ class HargaSppResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Harga SPP';
 
-    protected static ?string $navigationGroup = 'Transaksi SPP';
+    protected static string | \UnitEnum | null $navigationGroup = 'Transaksi SPP';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 6;
 
     public static function canAccess(): bool
     {
@@ -40,13 +59,13 @@ class HargaSppResource extends Resource
         return false;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Informasi Periode & Kelas')
+        return $schema
+            ->components([
+                Section::make('Informasi Periode & Kelas')
                     ->schema([
-                        Forms\Components\Select::make('periode_id')
+                Select::make('periode_id')
                             ->label('Periode')
                             ->relationship('periode', 'nama_periode')
                             ->searchable()
@@ -55,9 +74,9 @@ class HargaSppResource extends Resource
                             ->live()
                             ->afterStateUpdated(fn (callable $set) => $set('kelas_id', null)),
 
-                        Forms\Components\Select::make('kelas_id')
+                Select::make('kelas_id')
                             ->label('Kelas Spesifik (Opsional)')
-                            ->options(function (Forms\Get $get) {
+                    ->options(function (Get $get) {
                                 $periodeId = $get('periode_id');
                                 if (!$periodeId) return [];
 
@@ -74,9 +93,9 @@ class HargaSppResource extends Resource
                     ])
                     ->columns(2),
 
-                Forms\Components\Section::make('Informasi Harga')
+            Section::make('Informasi Harga')
                     ->schema([
-                        Forms\Components\TextInput::make('harga')
+                TextInput::make('harga')
                             ->label('Harga SPP')
                             ->required()
                             ->numeric()
@@ -86,12 +105,12 @@ class HargaSppResource extends Resource
                             ->maxValue(99999999999999.99)
                             ->placeholder('500000'),
 
-                        Forms\Components\Textarea::make('keterangan')
+                Textarea::make('keterangan')
                             ->label('Keterangan')
                             ->rows(3)
                             ->placeholder('Keterangan tambahan tentang harga SPP ini'),
 
-                        Forms\Components\Toggle::make('is_active')
+                Toggle::make('is_active')
                             ->label('Status Aktif')
                             ->default(true)
                             ->helperText('Hanya harga aktif yang akan digunakan dalam sistem'),
@@ -104,12 +123,12 @@ class HargaSppResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('periode.nama_periode')
+            TextColumn::make('periode.nama_periode')
                     ->label('Periode')
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('kelas.nama_kelas')
+            TextColumn::make('kelas.nama_kelas')
                     ->label('Kelas')
                     ->searchable()
                     ->placeholder('Semua kelas')
@@ -117,12 +136,12 @@ class HargaSppResource extends Resource
 
 
 
-                Tables\Columns\TextColumn::make('harga')
+            TextColumn::make('harga')
                     ->label('Harga SPP')
                     ->money('idr', true)
                     ->sortable(),
 
-                Tables\Columns\IconColumn::make('is_active')
+            IconColumn::make('is_active')
                     ->label('Status')
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
@@ -130,35 +149,35 @@ class HargaSppResource extends Resource
                     ->trueColor('success')
                     ->falseColor('danger'),
 
-                Tables\Columns\TextColumn::make('created_at')
+            TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('periode_id')
+            SelectFilter::make('periode_id')
                     ->label('Periode')
                     ->relationship('periode', 'nama_periode')
                     ->searchable()
                     ->preload(),
 
-                Tables\Filters\TernaryFilter::make('is_active')
+            TernaryFilter::make('is_active')
                     ->label('Status Aktif')
                     ->placeholder('Semua Status')
                     ->trueLabel('Aktif')
                     ->falseLabel('Tidak Aktif'),
             ])
-            ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
                 ])
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
@@ -174,9 +193,9 @@ class HargaSppResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListHargaSpps::route('/'),
-            'create' => Pages\CreateHargaSpp::route('/create'),
-            'edit' => Pages\EditHargaSpp::route('/{record}/edit'),
+            'index' => ListHargaSpps::route('/'),
+            'create' => CreateHargaSpp::route('/create'),
+            'edit' => EditHargaSpp::route('/{record}/edit'),
         ];
     }
 }

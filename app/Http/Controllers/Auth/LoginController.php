@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -21,10 +23,10 @@ class LoginController extends Controller
     /**
      * The user has logged out of the application.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @param Request $request
+     * @return RedirectResponse
      */
-    public function loggedOut(\Illuminate\Http\Request $request)
+    public function loggedOut(Request $request)
     {
         return redirect('/');
     }
@@ -32,10 +34,10 @@ class LoginController extends Controller
     /**
      * Log the user out of the application.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @param Request $request
+     * @return RedirectResponse
      */
-    public function logout(\Illuminate\Http\Request $request)
+    public function logout(Request $request)
     {
         $this->guard()->logout();
 
@@ -66,7 +68,7 @@ class LoginController extends Controller
     protected function sendFailedLoginResponse(Request $request)
     {
         // Check if user exists but is inactive
-        $user = \App\Models\User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
         if ($user && !$user->is_active) {
             throw ValidationException::withMessages([
@@ -82,11 +84,11 @@ class LoginController extends Controller
     /**
      * The user has been authenticated.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param  mixed  $user
      * @return mixed
      */
-    protected function authenticated(\Illuminate\Http\Request $request, $user)
+    protected function authenticated(Request $request, $user)
     {
         $request->session()->flash('welcome', 'Welcome back, ' . $user->name . '!');
     }

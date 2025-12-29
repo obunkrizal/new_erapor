@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\User;
 use App\Models\Kelas;
 use App\Models\Nilai;
 use App\Models\Periode;
@@ -49,7 +50,7 @@ class PeriodeOverviewWidget extends BaseWidget
 
         // Average students per class
         $avgSiswaPerKelas = $totalKelas > 0 ? round($totalSiswa / $totalKelas, 1) : 0;
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
 
         return [

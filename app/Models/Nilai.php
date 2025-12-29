@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -139,7 +140,7 @@ class Nilai extends Model
             }
 
             return [];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error getting image URLs for field {$field}: " . $e->getMessage(), [
                 'record_id' => $this->id,
                 'field' => $field,

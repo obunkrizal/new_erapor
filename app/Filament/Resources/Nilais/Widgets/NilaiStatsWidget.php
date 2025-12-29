@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\NilaiResource\Widgets;
+namespace App\Filament\Resources\Nilais\Widgets;
 
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\Nilai;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use Filament\Widgets\StatsOverviewWidget\Card;
 
 class NilaiStatsWidget extends BaseWidget
 {
@@ -17,10 +17,10 @@ class NilaiStatsWidget extends BaseWidget
         $averageNilaiLiterasi = Nilai::avg('nilai_literasi');
 
         return [
-            Card::make('Total Penilaian', $totalNilai),
-            Card::make('Rata-rata Nilai Agama', number_format($averageNilaiAgama, 2)),
-            Card::make('Rata-rata Nilai Jati Diri', number_format($averageNilaiJatiDiri, 2)),
-            Card::make('Rata-rata Nilai Literasi', number_format($averageNilaiLiterasi, 2)),
+            Stat::make('Total Penilaian', $totalNilai),
+            Stat::make('Rata-rata Nilai Agama', number_format($averageNilaiAgama, 2)),
+            Stat::make('Rata-rata Nilai Jati Diri', number_format($averageNilaiJatiDiri, 2)),
+            Stat::make('Rata-rata Nilai Literasi', number_format($averageNilaiLiterasi, 2)),
         ];
     }
 }

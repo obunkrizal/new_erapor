@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\User;
 use App\Models\Siswa;
 use App\Models\Periode;
 use App\Models\KelasSiswa;
@@ -17,7 +18,7 @@ class SiswaStatsWidget extends BaseWidget
 
     public static function canView(): bool
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return $user && $user->isAdmin();
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Nilai;
 use App\Models\Sekolah;
 use App\Models\DataMedisSiswa;
@@ -85,7 +86,7 @@ class NilaiController extends Controller
                 'izin' => 0,
                 'tanpa_keterangan' => 0
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return (object) [
                 'sakit' => 0,
                 'izin' => 0,

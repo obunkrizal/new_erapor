@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Siswa - {{ $kelasSiswa->siswa->nama_lengkap }}</title>
-<link href="{{ asset('css/filament/print/printpage.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/filament/print/printpage.css') }}" rel="stylesheet">
     <style>
         @media print {
             @page {
@@ -24,8 +24,8 @@
         <div class="header">
             <div class="header-left">
                 @if ($sekolah->logo)
-                    <img src="{{ Storage::disk('public')->url($sekolah->logo) }}" alt="Logo {{ $sekolah->nama_sekolah }}"
-                        class="header-logo">
+                    <img src="{{ Storage::disk('public')->url($sekolah->logo) }}"
+                        alt="Logo {{ $sekolah->nama_sekolah }}" class="header-logo">
                 @endif
                 <div class="header-info">
                     <h4>{{ Str::upper($sekolah->nama_sekolah) }}</h4>
@@ -54,7 +54,8 @@
                             <tr>
                                 <td class="label">Nama Lengkap</td>
                                 <td class="value" style="width: 100px;">
-                                    <strong>{{ Str::upper($kelasSiswa->siswa->nama_lengkap) }}</strong></td>
+                                    <strong>{{ Str::upper($kelasSiswa->siswa->nama_lengkap) }}</strong>
+                                </td>
                             </tr>
                             <tr>
                                 <td class="label">NIS</td>
@@ -108,20 +109,12 @@
                             </tr>
                             <tr>
                                 <td class="label">Jenis Kelamin</td>
-                                <td class="value">{{ $kelasSiswa->siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
+                                <td class="value">
+                                    {{ $kelasSiswa->siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
                             </tr>
                         </table>
                     </div>
-                    <div>
-                        <div>
-                            <p style="text-align: center">ScanMe!</p>
 
-                            <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($kelasSiswa->siswa?->nama_lengkap) . '_ NIS: ' . $kelasSiswa->siswa?->nis . '_ NISN: ' . $kelasSiswa->siswa?->nisn . '_' . ($kelasSiswa->siswa?->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') . '_' . $kelasSiswa->siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($kelasSiswa->siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
-                                alt="barcode" width="65" />
-
-                        </div>
-
-                    </div>
                 </div>
             </div>
         </div>
@@ -261,10 +254,18 @@
             </div>
 
         </div>
+        <div>
+            <!---QrCode-->
+            <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($kelasSiswa->siswa?->nama_lengkap) . '_ NIS: ' . $kelasSiswa->siswa?->nis . '_ NISN: ' . $kelasSiswa->siswa?->nisn . '_' . ($kelasSiswa->siswa?->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') . '_' . $kelasSiswa->siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($kelasSiswa->siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
+                alt="barcode" width="65" />
+
+
+        </div>
         <!-- Print Information -->
         <div class="print-info">
-            <p>Dicetak pada: {{ now()->format('d F Y, H:i:s') }} WIB</p>
-            <p>Dokumen ini dicetak secara otomatis oleh sistem</p>
+
+                {{ Str::upper($kelasSiswa->siswa->nama_lengkap) }}_{{ $kelasSiswa->siswa->nis ?? '-' }}
+                /{{ $kelasSiswa->siswa->nisn ?? '-' }}
         </div>
     </div>
 
@@ -381,7 +382,7 @@
             border-top: 1px solid #ddd;
             font-size: 9px;
             color: #999;
-            text-align: center;
+            text-align: left;
             page-break-inside: avoid;
         }
 

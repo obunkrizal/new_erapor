@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\NilaiResource\Pages;
+namespace App\Filament\Resources\Nilais\Pages;
 
-use App\Filament\Resources\NilaiResource;
+use Filament\Actions\ViewAction;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\Nilais\NilaiResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
@@ -44,8 +46,8 @@ class EditNilai extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make()
+            ViewAction::make(),
+            DeleteAction::make()
                 ->visible(fn (): bool => !Auth::user()->isAdmin()),
         ];
     }

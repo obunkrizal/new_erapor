@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Filament\Resources\GuruNilaiResource\Pages;
+namespace App\Filament\Resources\GuruNilais\Pages;
 
-use App\Filament\Resources\GuruNilaiResource;
+use Filament\Schemas\Components\Tabs\Tab;
+use App\Filament\Resources\GuruNilais\GuruNilaiResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListGuruNilais extends ListRecords

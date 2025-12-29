@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\SekolahResource\Pages;
+namespace App\Filament\Resources\Sekolahs\Pages;
 
-use App\Filament\Resources\SekolahResource;
+use App\Filament\Resources\Sekolahs\SekolahResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 

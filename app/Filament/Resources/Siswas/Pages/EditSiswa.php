@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\SiswaResource\Pages;
+namespace App\Filament\Resources\Siswas\Pages;
 
-use App\Filament\Resources\SiswaResource;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\Siswas\SiswaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -18,7 +19,7 @@ class EditSiswa extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

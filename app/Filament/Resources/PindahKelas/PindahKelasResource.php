@@ -1,7 +1,29 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\PindahKelas;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Hidden;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\PindahKelas\Pages\ListPindahKelas;
+use App\Filament\Resources\PindahKelas\Pages\CreatePindahKelas;
+use App\Filament\Resources\PindahKelas\Pages\EditPindahKelas;
 use App\Filament\Resources\PindahKelasResource\Pages;
 use App\Models\PindahKelas;
 use App\Models\Kelas;
@@ -9,7 +31,6 @@ use App\Models\Siswa;
 use App\Models\KelasSiswa;
 use App\Models\Periode;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -22,12 +43,12 @@ use Exception;
 class PindahKelasResource extends Resource
 {
     protected static ?string $model = PindahKelas::class;
-    protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrow-path';
     protected static ?string $navigationLabel = 'Pindah Kelas';
     protected static ?string $modelLabel = 'Pindah Kelas';
     protected static ?string $pluralModelLabel = 'Pindah Kelas';
-    protected static ?string $navigationGroup = 'Akademik';
-    protected static ?int $navigationSort = 6;
+    protected static string | \UnitEnum | null $navigationGroup = 'Akademik';
+    protected static ?int $navigationSort = 3;
 
     // Show navigation only for admin
     public static function shouldRegisterNavigation(): bool
@@ -117,17 +138,17 @@ class PindahKelasResource extends Resource
         }
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Informasi Pindah Kelas')
+        return $schema
+            ->components([
+                Section::make('Informasi Pindah Kelas')
                     ->description('Pilih siswa dan kelas tujuan untuk perpindahan')
                     ->icon('heroicon-o-information-circle')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                Grid::make(2)
                             ->schema([
-                                Forms\Components\Select::make('siswa_id')
+                    Select::make('siswa_id')
                                     ->label('Siswa')
                                     ->options(function () {
                                         return Siswa::whereHas('kelasSiswa', function ($query) {
@@ -146,7 +167,7 @@ class PindahKelasResource extends Resource
                                     ->required()
                                     ->searchable()
                                     ->live()
-                                    ->afterStateUpdated(function (Forms\Set $set, $state) {
+                        ->afterStateUpdated(function (Set $set, $state) {
                                         if ($state) {
                                             $siswa = Siswa::find($state);
                                             $kelasAktif = $siswa->kelasSiswa()
@@ -161,15 +182,15 @@ class PindahKelasResource extends Resource
                                         }
                                     }),
 
-                                Forms\Components\Select::make('kelas_asal_id')
+                    Select::make('kelas_asal_id')
                                     ->label('Kelas Asal')
                                     ->relationship('kelasAsal', 'nama_kelas')
                                     ->disabled()
                                     ->dehydrated(),
 
-                                Forms\Components\Select::make('kelas_tujuan_id')
+                    Select::make('kelas_tujuan_id')
                                     ->label('Kelas Tujuan')
-                                    ->options(function (Forms\Get $get) {
+                        ->options(function (Get $get) {
                                         $kelasAsalId = $get('kelas_asal_id');
                                         $periodeId = $get('periode_id');
 
@@ -195,23 +216,23 @@ class PindahKelasResource extends Resource
                                     })
                                     ->required()
                                     ->searchable()
-                                    ->disabled(fn(Forms\Get $get) => empty($get('siswa_id')))
+                        ->disabled(fn(Get $get) => empty($get('siswa_id')))
                                     ->helperText('Pilih kelas tujuan yang masih memiliki kapasitas'),
 
-                                Forms\Components\Select::make('periode_id')
+                    Select::make('periode_id')
                                     ->label('Periode')
                                     ->relationship('periode', 'nama_periode')
                                     ->disabled()
                                     ->dehydrated(),
 
-                                Forms\Components\DatePicker::make('tanggal_pindah')
+                    DatePicker::make('tanggal_pindah')
                                     ->label('Tanggal Pindah')
                                     ->required()
                                     ->default(now())
                                     ->native(false)
                                     ->helperText('Tanggal efektif perpindahan kelas'),
 
-                                Forms\Components\Select::make('status')
+                    Select::make('status')
                                     ->label('Status')
                                     ->options([
                                         'pending' => 'Pending',
@@ -223,20 +244,20 @@ class PindahKelasResource extends Resource
                                     ->native(false),
                             ]),
 
-                        Forms\Components\Textarea::make('alasan_pindah')
+                Textarea::make('alasan_pindah')
                             ->label('Alasan Pindah Kelas')
                             ->required()
                             ->rows(3)
                             ->placeholder('Masukkan alasan perpindahan kelas (contoh: permintaan orang tua, penyesuaian kemampuan, dll)')
                             ->columnSpanFull(),
 
-                        Forms\Components\Textarea::make('catatan')
+                Textarea::make('catatan')
                             ->label('Catatan Tambahan')
                             ->rows(3)
                             ->placeholder('Catatan tambahan dari admin (opsional)')
                             ->columnSpanFull(),
 
-                        Forms\Components\Hidden::make('user_id')
+                Hidden::make('user_id')
                             ->default(Auth::id()),
                     ]),
             ]);
@@ -246,37 +267,37 @@ class PindahKelasResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('siswa.nama_lengkap')
+            TextColumn::make('siswa.nama_lengkap')
                     ->label('Nama Siswa')
                     ->searchable()
                     ->sortable()
                     ->description(fn($record) => 'NIS: ' . ($record->siswa?->nis ?? 'N/A'))
                     ->weight('bold'),
 
-                Tables\Columns\TextColumn::make('kelasAsal.nama_kelas')
+            TextColumn::make('kelasAsal.nama_kelas')
                     ->label('Kelas Asal')
                     ->badge()
                     ->color('warning')
                     ->sortable(),
 
-                Tables\Columns\IconColumn::make('transfer_arrow')
+            IconColumn::make('transfer_arrow')
                     ->label('')
                     ->icon('heroicon-o-arrow-right')
                     ->color('primary')
                     ->alignCenter(),
 
-                Tables\Columns\TextColumn::make('kelasTujuan.nama_kelas')
+            TextColumn::make('kelasTujuan.nama_kelas')
                     ->label('Kelas Tujuan')
                     ->badge()
                     ->color('success')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('tanggal_pindah')
+            TextColumn::make('tanggal_pindah')
                     ->label('Tanggal Pindah')
                     ->date('d M Y')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('status')
+            TextColumn::make('status')
                     ->label('Status')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -293,25 +314,25 @@ class PindahKelasResource extends Resource
                     })
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('alasan_pindah')
+            TextColumn::make('alasan_pindah')
                     ->label('Alasan')
                     ->limit(50)
                     ->tooltip(fn($record) => $record->alasan_pindah)
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('user.name')
+            TextColumn::make('user.name')
                     ->label('Diproses Oleh')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('created_at')
+            TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
+            SelectFilter::make('status')
                     ->label('Status')
                     ->options([
                         'pending' => 'Pending',
@@ -320,30 +341,30 @@ class PindahKelasResource extends Resource
                     ])
                     ->native(false),
 
-                Tables\Filters\SelectFilter::make('kelas_asal_id')
+            SelectFilter::make('kelas_asal_id')
                     ->label('Kelas Asal')
                     ->relationship('kelasAsal', 'nama_kelas')
                     ->searchable()
                     ->preload(),
 
-                Tables\Filters\SelectFilter::make('kelas_tujuan_id')
+            SelectFilter::make('kelas_tujuan_id')
                     ->label('Kelas Tujuan')
                     ->relationship('kelasTujuan', 'nama_kelas')
                     ->searchable()
                     ->preload(),
 
-                Tables\Filters\SelectFilter::make('periode_id')
+            SelectFilter::make('periode_id')
                     ->label('Periode')
                     ->relationship('periode', 'nama_periode')
                     ->default(fn() => Periode::where('is_active', true)->value('id')),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
+            ->recordActions([
+                ViewAction::make(),
 
-                Tables\Actions\EditAction::make()
+            EditAction::make()
                     ->visible(fn(PindahKelas $record): bool => $record->status === 'pending'),
 
-                Tables\Actions\Action::make('approve')
+            Action::make('approve')
                     ->label('Setujui')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
@@ -356,12 +377,12 @@ class PindahKelasResource extends Resource
                     ->modalSubmitActionLabel('Ya, Setujui')
                     ->visible(fn(PindahKelas $record): bool => $record->status === 'pending'),
 
-                Tables\Actions\Action::make('reject')
+            Action::make('reject')
                     ->label('Tolak')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
-                    ->form([
-                        Forms\Components\Textarea::make('catatan')
+                ->schema([
+                    Textarea::make('catatan')
                             ->label('Alasan Penolakan')
                             ->required()
                             ->rows(3)
@@ -376,15 +397,15 @@ class PindahKelasResource extends Resource
                     ->modalSubmitActionLabel('Ya, Tolak')
                     ->visible(fn(PindahKelas $record): bool => $record->status === 'pending'),
 
-                Tables\Actions\DeleteAction::make()
+            DeleteAction::make()
                     ->requiresConfirmation()
                     ->modalHeading('Hapus Data Pindah Kelas')
                     ->modalDescription('Apakah Anda yakin ingin menghapus data perpindahan kelas ini?')
                     ->modalSubmitActionLabel('Ya, Hapus'),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('bulk_approve')
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('bulk_approve')
                         ->label('Setujui Terpilih')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
@@ -407,12 +428,12 @@ class PindahKelasResource extends Resource
                         ->modalDescription('Apakah Anda yakin ingin menyetujui semua perpindahan kelas yang dipilih?')
                         ->modalSubmitActionLabel('Ya, Setujui Semua'),
 
-                    Tables\Actions\BulkAction::make('bulk_reject')
+                BulkAction::make('bulk_reject')
                         ->label('Tolak Terpilih')
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
                         ->form([
-                            Forms\Components\Textarea::make('catatan')
+                    Textarea::make('catatan')
                                 ->label('Alasan Penolakan')
                                 ->required()
                                 ->rows(3)
@@ -437,7 +458,7 @@ class PindahKelasResource extends Resource
                         ->modalDescription('Apakah Anda yakin ingin menolak semua perpindahan kelas yang dipilih?')
                         ->modalSubmitActionLabel('Ya, Tolak Semua'),
 
-                    Tables\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
@@ -446,9 +467,9 @@ class PindahKelasResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPindahKelas::route('/'),
-            'create' => Pages\CreatePindahKelas::route('/create'),
-            'edit' => Pages\EditPindahKelas::route('/{record}/edit'),
+            'index' => ListPindahKelas::route('/'),
+            'create' => CreatePindahKelas::route('/create'),
+            'edit' => EditPindahKelas::route('/{record}/edit'),
         ];
     }
 

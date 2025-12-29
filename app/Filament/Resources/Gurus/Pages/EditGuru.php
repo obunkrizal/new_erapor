@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\GuruResource\Pages;
+namespace App\Filament\Resources\Gurus\Pages;
 
-use App\Filament\Resources\GuruResource;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\Gurus\GuruResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -16,7 +17,7 @@ class EditGuru extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use Laravolt\Indonesia\Models\Province;
+use Laravolt\Indonesia\Models\City;
+use Laravolt\Indonesia\Models\District;
+use Laravolt\Indonesia\Models\Village;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -66,7 +70,7 @@ class Guru extends Model
      */
     public function provinsi()
     {
-        return $this->belongsTo(\Laravolt\Indonesia\Models\Province::class, 'provinsi_id');
+        return $this->belongsTo(Province::class, 'provinsi_id');
     }
 
     /**
@@ -74,7 +78,7 @@ class Guru extends Model
      */
     public function kota()
     {
-        return $this->belongsTo(\Laravolt\Indonesia\Models\City::class, 'kota_id');
+        return $this->belongsTo(City::class, 'kota_id');
     }
 
     /**
@@ -82,7 +86,7 @@ class Guru extends Model
      */
     public function kecamatan()
     {
-        return $this->belongsTo(\Laravolt\Indonesia\Models\District::class, 'kecamatan_id');
+        return $this->belongsTo(District::class, 'kecamatan_id');
     }
 
     /**
@@ -90,6 +94,6 @@ class Guru extends Model
      */
     public function kelurahan()
     {
-        return $this->belongsTo(\Laravolt\Indonesia\Models\Village::class, 'kelurahan_id');
+        return $this->belongsTo(Village::class, 'kelurahan_id');
     }
 }

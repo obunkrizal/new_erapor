@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Filament\Http\Responses\Auth\Contracts\LogoutResponse as Responsable;
+use Filament\Auth\Http\Responses\Contracts\LogoutResponse;
 use Illuminate\Http\RedirectResponse;
 
-class MyLogoutResponse implements Responsable
+class MyLogoutResponse implements LogoutResponse
 {
     public function toResponse($request): RedirectResponse
     {

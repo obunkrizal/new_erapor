@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\PeriodeResource\Pages;
+namespace App\Filament\Resources\Periodes\Pages;
 
-use App\Filament\Resources\PeriodeResource;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\Periodes\PeriodeResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -13,7 +14,7 @@ class ListPeriodes extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

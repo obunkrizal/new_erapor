@@ -1,26 +1,44 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\Periodes;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\Periodes\Pages\ListPeriodes;
+use App\Filament\Resources\Periodes\Pages\CreatePeriode;
+use App\Filament\Resources\Periodes\Pages\EditPeriode;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Periode;
-use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\PeriodeResource\Pages;
-use Filament\Tables\Actions\ActionGroup;
 
 class PeriodeResource extends Resource
 {
     protected static ?string $model = Periode::class;
-    protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-calendar-days';
     protected static ?string $navigationLabel = 'Periode Akademik';
     protected static ?string $modelLabel = 'Periode';
     protected static ?string $pluralModelLabel = 'Periode Akademik';
-    protected static ?string $navigationGroup = 'Akademik';
+    protected static string | \UnitEnum | null $navigationGroup = 'Akademik';
     protected static ?int $navigationSort = 3;
 
     // Hide navigation for guru
@@ -55,25 +73,25 @@ class PeriodeResource extends Resource
         return Auth::user()?->isAdmin() ?? false;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Informasi Periode')
+        return $schema
+            ->components([
+                Section::make('Informasi Periode')
                 ->schema([
 
-                Forms\Components\Select::make('tahun_ajaran')
+                Select::make('tahun_ajaran')
                             ->label('Tahun Ajaran')
                     ->options(self::getTahunAjaranOptions())
                     ->required()
                     ->searchable()
                     ->native(false)
                     ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
                         self::generateNamaPeriode($set, $get);
                     }),
 
-                        Forms\Components\Select::make('semester')
+                        Select::make('semester')
                             ->label('Semester')
                             ->options([
                                 'ganjil' => 'Ganjil',
@@ -82,18 +100,18 @@ class PeriodeResource extends Resource
                     ->required()
                     ->native(false)
                     ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
                         self::generateNamaPeriode($set, $get);
                     }),
 
-                Forms\Components\TextInput::make('nama_periode')
+                TextInput::make('nama_periode')
                     ->label('Nama Periode')
                     ->required()
                     ->readOnly()
                     ->dehydrated()
                     ->helperText('Nama periode akan dibuat otomatis berdasarkan tahun ajaran dan semester'),
 
-                        Forms\Components\Toggle::make('is_active')
+                        Toggle::make('is_active')
                             ->label('Status Aktif')
                             ->default(false),
                     ])
@@ -117,7 +135,7 @@ class PeriodeResource extends Resource
         return $options;
     }
 
-    private static function generateNamaPeriode(Forms\Set $set, Forms\Get $get): void
+    private static function generateNamaPeriode(Set $set, Get $get): void
     {
         $tahunAjaran = $get('tahun_ajaran');
         $semester = $get('semester');
@@ -133,17 +151,17 @@ class PeriodeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nama_periode')
+                TextColumn::make('nama_periode')
                     ->label('Nama Periode')
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('tahun_ajaran')
+                TextColumn::make('tahun_ajaran')
                     ->label('Tahun Ajaran')
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('semester')
+                TextColumn::make('semester')
                     ->label('Semester')
                     ->badge()
                 ->color(fn(string $state): string => match ($state) {
@@ -152,7 +170,7 @@ class PeriodeResource extends Resource
                         default => 'gray',
                     }),
 
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->label('Status')
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
@@ -161,28 +179,28 @@ class PeriodeResource extends Resource
                     ->falseColor('danger'),
             ])
             ->filters([
-            Tables\Filters\SelectFilter::make('tahun_ajaran')
+            SelectFilter::make('tahun_ajaran')
                 ->label('Tahun Ajaran')
                 ->options(self::getTahunAjaranOptions()),
 
-            Tables\Filters\SelectFilter::make('semester')
+            SelectFilter::make('semester')
                     ->options([
                         'ganjil' => 'Ganjil',
                         'genap' => 'Genap',
                     ]),
 
-                Tables\Filters\TernaryFilter::make('is_active')
+                TernaryFilter::make('is_active')
                     ->label('Status Aktif'),
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
+                ViewAction::make(),
 
                 // Only show for admin
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->visible(fn() => Auth::user()?->isAdmin()),
 
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->visible(fn() => Auth::user()?->isAdmin()),
                 ])
                 ->label('Aksi')
@@ -191,9 +209,9 @@ class PeriodeResource extends Resource
                 ->color('gray')
                 ->button(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
                         ->visible(fn() => Auth::user()?->isAdmin()),
                 ]),
             ]);
@@ -202,10 +220,10 @@ class PeriodeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPeriodes::route('/'),
-            'create' => Pages\CreatePeriode::route('/create'),
+            'index' => ListPeriodes::route('/'),
+            'create' => CreatePeriode::route('/create'),
             // 'view' => Pages\ViewPeriode::route('/{record}'),
-            'edit' => Pages\EditPeriode::route('/{record}/edit'),
+            'edit' => EditPeriode::route('/{record}/edit'),
         ];
     }
 

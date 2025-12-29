@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\SekolahResource\Pages;
+namespace App\Filament\Resources\Sekolahs\Pages;
 
-use App\Filament\Resources\SekolahResource;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\Sekolahs\SekolahResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -18,7 +19,7 @@ class EditSekolah extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

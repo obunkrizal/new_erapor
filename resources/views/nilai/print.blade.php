@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
 @php
-    function formatRupiah($number) {
+    function formatRupiah($number)
+    {
         return 'Rp ' . number_format($number, 0, ',', '.');
     }
 @endphp
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +20,19 @@
                 margin: 1cm;
             }
         }
+        .print-info {
+                margin-top: 20px;
+                padding-top: 15px;
+                border-top: 1px solid #ddd;
+                font-size: 9px;
+                color: #999;
+                text-align: left;
+                page-break-inside: avoid;
+            }
+
+            .print-info p {
+                margin-bottom: 3px;
+            }
     </style>
 </head>
 
@@ -30,6 +45,8 @@
             <button class="error-close-button" onclick="window.close()">Close</button>
         </div>
         <style>
+
+
             .error-message-box {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: #fff;
@@ -46,12 +63,14 @@
                 transform: translate(-50%, -50%);
                 z-index: 9999;
             }
+
             .error-message-text {
                 font-size: 18px;
                 font-weight: 700;
                 margin-bottom: 20px;
                 letter-spacing: 0.5px;
             }
+
             .error-close-button {
                 background: rgba(255, 255, 255, 0.9);
                 color: #764ba2;
@@ -65,25 +84,28 @@
                 box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
                 outline: none;
             }
+
             .error-close-button:hover {
                 background: #fff;
                 color: #5a2d82;
                 box-shadow: 0 6px 16px rgba(90, 45, 130, 0.5);
                 transform: translateY(-2px);
             }
+
             .print-button {
                 display: none !important;
             }
+
             .container {
                 display: none !important;
             }
         </style>
     @endif
-        <button class="print-button no-print" onclick="window.print()">🖨️ Print</button>
+    <button class="print-button no-print" onclick="window.print()">🖨️ Print</button>
 
-        <div class="container">
-            <!-- Header -->
-            <div class="header">
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
             <div class="header-left">
                 @if ($sekolah->logo)
                     <img src="{{ Storage::disk('public')->url($sekolah->logo) }}"
@@ -151,20 +173,12 @@
                             </tr>
                         </table>
                     </div>
-                    <div>
-                        <div>
-                            <p style="text-align: center">ScanMe!</p>
 
-                            <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($nilai->siswa?->nama_lengkap) . '_ NIS: ' . $nilai->siswa?->nis . '_ NISN: ' . $nilai->siswa?->nisn . '_' . ($nilai->siswa?->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') . ' ' . $nilai->siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($nilai->siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
-                                alt="barcode" width="65" />
-
-                        </div>
-
-                    </div>
                 </div>
             </div>
         </div>
-        <h1 style="font-size:10pt;text-align:center;margin-bottom:10px;margin-top:10px">PENILAIAN HASIL BELAJAR PESERTA DIDIK</h1>
+        <h1 style="font-size:10pt;text-align:center;margin-bottom:10px;margin-top:10px">PENILAIAN HASIL BELAJAR PESERTA
+            DIDIK</h1>
         <!-- Combined Information Sections -->
         <div class="section">
             <div class="section-title">Nilai Agama dan Budi Pekerti</div>
@@ -187,13 +201,13 @@
                                 @foreach ($nilai->fotoAgama as $foto)
                                     <div>
                                         <img src="{{ Storage::url($foto) }}" alt="Foto Agama"
-                                            style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 5px;">
+                                            style="max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 5px;">
                                     </div>
                                 @endforeach
                             @elseif(isset($nilai->fotoAgama) && $nilai->fotoAgama)
                                 <div>
                                     <img src="{{ Storage::url($nilai->fotoAgama) }}" alt="Foto Agama"
-                                        style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 8px;">
+                                        style="max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 8px;">
                                 </div>
                             @else
                                 <div
@@ -230,13 +244,13 @@
                                 @foreach ($nilai->fotoJatiDiri as $foto)
                                     <div>
                                         <img src="{{ Storage::url($foto) }}" alt="Foto Agama"
-                                            style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 5px;">
+                                            style="max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 5px;">
                                     </div>
                                 @endforeach
                             @elseif(isset($nilai->fotoJatiDiri) && $nilai->fotoJatiDiri)
                                 <div>
                                     <img src="{{ Storage::url($nilai->fotoJatiDiri) }}" alt="Foto Agama"
-                                        style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 8px;">
+                                        style="max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 8px;">
                                 </div>
                             @else
                                 <div
@@ -268,24 +282,24 @@
                 <div class="section-title">Dokumentasi Nilai Dasar-Dasar Literasi, Matematika, Sains, Rekayasa,
                     Teknologi, dan Seni</div>
                 <table class="info-table">
-                    <tr style="height: 100px;">
+                    <tr style="height: 200px;">
                         <td class="value" style="justify-content: space-between;column-span:2">
                             <div style="display: flex; justify-content: center; gap: 16px;">
                                 @if (isset($nilai->fotoLiterasi) && is_array($nilai->fotoLiterasi) && count($nilai->fotoLiterasi) > 0)
                                     @foreach ($nilai->fotoLiterasi as $foto)
                                         <div>
                                             <img src="{{ Storage::url($foto) }}" alt="Foto Agama"
-                                                style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 5px;">
+                                                style="max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 5px;">
                                         </div>
                                     @endforeach
                                 @elseif(isset($nilai->fotoLiterasi) && $nilai->fotoLiterasi)
                                     <div>
                                         <img src="{{ Storage::url($nilai->fotoLiterasi) }}" alt="Foto Agama"
-                                            style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 8px;">
+                                            style="max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 8px;">
                                     </div>
                                 @else
                                     <div
-                                        style="border: 2px dashed #ccc; width: 100px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 5px;">
+                                        style="border: 2px dashed #ccc; width: 150px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 5px;">
                                         <span style="color: #999;">Belum ada foto</span>
                                     </div>
                                 @endif
@@ -296,10 +310,10 @@
                 </table>
             </div>
             <!-- Combined Information Sections -->
-            <div class="section">
+            {{-- <div class="section">
                 <div class="section-title">Nilai Narasi Pembelajaran</div>
                 <table class="info-table">
-                    <tr style="height: 100px;">
+                    <tr style="height: 150px;">
                         <td class="value" style="justify-content: space-between;column-span:2">
                            {{ $nilai->nilai_narasi ?? 'Belum Ada Nilai' }}</td>
                     </tr>
@@ -336,7 +350,7 @@
                     </tr>
 
                 </table>
-            </div>
+            </div> --}}
         </div>
         <!-- Combined Information Sections -->
         <div style="page-break-before: always; margin-top: 100px; padding-top: 70px;">
@@ -384,6 +398,7 @@
         <div class="student-info-header">
             <div class="student-basic-info">
                 <div class="section-title">Data Kehadiran Siswa</div>
+
                 <div class="three-column">
                     <div class="column">
                         <table class="info-table">
@@ -397,7 +412,7 @@
                     <div class="column">
                         <table class="info-table">
                             <tr>
-                                <td class="label">Izin</td>
+                                <td class="label" widht="50px">Izin</td>
                                 <td class="value">{{ $absensi?->izin ?? '-' }} Hari</td>
                             </tr>
 
@@ -406,7 +421,7 @@
                     <div class="column">
                         <table class="info-table">
                             <tr>
-                                <td class="label" widht="50px">Alfa</td>
+                                <td class="label" widht="100px">Tanpa Keterangan</td>
                                 <td class="value">{{ $absensi?->tanpa_keterangan ?? '-' }} Hari</td>
                             </tr>
 
@@ -423,7 +438,7 @@
         <!-- Signature Section -->
         <div class="signature-section" style="margin-bottom:0px; flex-wrap: wrap;">
             <div class="signature-box">
-                <div style="margin-bottom:20px "></div>
+                <div style="margin-bottom:5px "></div>
                 <div>Orang Tua/Wali</div>
                 <div class="signature-line">
                     <strong>
@@ -450,7 +465,11 @@
                 </div>
             </div>
         </div>
+        <div class="d-flex-inline">
+
+        </div>
         <div style="display: flex; justify-content: center; margin-top: 5px;">
+
             <div class="signature-box">
                 <div style="margin-bottom: 0px">Mengetahui
                 </div>
@@ -467,28 +486,36 @@
                 </div>
             </div>
         </div>
+        <div class="text-left col-md-3">
+            <img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(STR::upper($nilai->siswa?->nama_lengkap) . '_ NIS: ' . $nilai->siswa?->nis . '_ NISN: ' . $nilai->siswa?->nisn . '_' . ($nilai->siswa?->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') . ' ' . $nilai->siswa?->tempat_lahir . ', ' . Carbon\Carbon::parse($nilai->siswa?->tanggal_lahir)->translatedFormat('d F Y'), 'QRCODE', 3, 3) }}"
+                alt="barcode" width="65" />
+        </div>
         <!-- Print Information -->
         <div class="print-info">
-            <p>Dicetak pada: {{ now()->format('d F Y, H:i:s') }} WIB</p>
-            <p>Dokumen ini dicetak secara otomatis oleh sistem</p>
+            Rombel:
+            {{ $nilai->kelas->nama_kelas }}_{{ Str::upper($nilai->siswa->nama_lengkap) }}_{{ $nilai->siswa->nis ?? '-' }}
+            /{{ $nilai->siswa->nisn ?? '-' }}
+
+            {{-- <p>Dicetak pada: {{ now()->format('d F Y, H:i:s') }} WIB</p>
+            <p>Dokumen ini dicetak secara otomatis oleh sistem</p> --}}
+
         </div>
-    </div>
 
 
-    <script>
-        // Auto print when page loads (optional)
-        // window.onload = function() { window.print(); }
+        <script>
+            // Auto print when page loads (optional)
+            // window.onload = function() { window.print(); }
 
-        // Print function
-        function printDocument() {
-            window.print();
-        }
+            // Print function
+            function printDocument() {
+                window.print();
+            }
 
-        // Close window after printing (optional)
-        window.onafterprint = function() {
-            // window.close();
-        }
-    </script>
+            // Close window after printing (optional)
+            window.onafterprint = function() {
+                // window.close();
+            }
+        </script>
 </body>
 
 </html>

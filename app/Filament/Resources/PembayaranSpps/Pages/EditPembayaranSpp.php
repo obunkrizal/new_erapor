@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\PembayaranSppResource\Pages;
+namespace App\Filament\Resources\PembayaranSpps\Pages;
 
-use App\Filament\Resources\PembayaranSppResource;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\PembayaranSpps\PembayaranSppResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -18,7 +19,7 @@ class EditPembayaranSpp extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

@@ -2,15 +2,16 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\User;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 
 class SuratKeputusanComingSoon extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationLabel = 'Surat Keputusan Guru';
-    protected static ?string $navigationGroup = 'Administrasi';
-    protected static string $view = 'filament.pages.surat-keputusan-coming-soon';
+    protected static string | \UnitEnum | null $navigationGroup = 'Administrasi';
+    protected string $view = 'filament.pages.surat-keputusan-coming-soon';
     protected static ?string $title = 'Coming Soon!!';
 
     public static function getNavigationBadge(): ?string
@@ -31,7 +32,7 @@ class SuratKeputusanComingSoon extends Page
 
     public static function canAccess(): bool
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return $user && $user->isAdmin();
     }

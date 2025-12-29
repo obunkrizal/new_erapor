@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\GuruResource\Pages;
+namespace App\Filament\Resources\Gurus\Pages;
 
-use App\Filament\Resources\GuruResource;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\Gurus\GuruResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -13,7 +14,7 @@ class ListGurus extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

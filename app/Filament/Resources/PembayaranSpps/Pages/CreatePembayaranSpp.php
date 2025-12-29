@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\PembayaranSppResource\Pages;
+namespace App\Filament\Resources\PembayaranSpps\Pages;
 
-use App\Filament\Resources\PembayaranSppResource;
+use App\Filament\Resources\PembayaranSpps\PembayaranSppResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 

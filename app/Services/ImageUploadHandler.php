@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Intervention\Image\ImageManagerStatic;
 use Exception;
 use Illuminate\Support\Str;
 use Intervention\Image\Image;
@@ -106,7 +107,7 @@ class ImageUploadHandler
 
             // Process and store image
             if ($options['resize'] || $options['optimize']) {
-                $image = \Intervention\Image\ImageManagerStatic::make($file);
+                $image = ImageManagerStatic::make($file);
                 
                 if ($options['resize']) {
                     $image->resize($options['maxWidth'], $options['maxHeight'], function ($constraint) {

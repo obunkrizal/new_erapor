@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\PembayaranSppResource\Pages;
+namespace App\Filament\Resources\PembayaranSpps\Pages;
 
-use App\Filament\Resources\PembayaranSppResource;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\PembayaranSpps\PembayaranSppResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -13,7 +14,7 @@ class ListPembayaranSpps extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
             // Actions\Action::make('printLaporan')
             //     ->label('Cetak Laporan')
             //     ->icon('heroicon-o-printer')

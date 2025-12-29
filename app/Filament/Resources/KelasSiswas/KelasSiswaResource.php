@@ -1,14 +1,39 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\KelasSiswas;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Carbon\Carbon;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkAction;
+use App\Filament\Resources\KelasSiswas\Pages\ListKelasSiswas;
+use App\Filament\Resources\KelasSiswas\Pages\CreateKelasSiswa;
+use App\Filament\Resources\KelasSiswas\Pages\ViewKelasSiswa;
+use App\Filament\Resources\KelasSiswas\Pages\EditKelasSiswa;
 use Exception;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\Periode;
-use Filament\Forms\Form;
 use App\Models\KelasSiswa;
 use Filament\Tables\Table;
 use App\Models\PindahKelas;
@@ -29,7 +54,7 @@ class KelasSiswaResource extends Resource
 {
     protected static ?string $model = KelasSiswa::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-academic-cap';
 
     protected static ?string $navigationLabel = 'Kelas Siswa';
 
@@ -37,7 +62,7 @@ class KelasSiswaResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Kelas Siswa';
 
-    protected static ?string $navigationGroup = 'Akademik';
+    protected static string | \UnitEnum | null $navigationGroup = 'Akademik';
 
     protected static ?int $navigationSort = 2;
 
@@ -169,7 +194,6 @@ class KelasSiswaResource extends Resource
             ]);
 
             return true;
-
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -192,19 +216,19 @@ class KelasSiswaResource extends Resource
         }
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Informasi Periode & Kelas')
+        return $schema
+            ->components([
+                Section::make('Informasi Periode & Kelas')
                     ->description('Pilih periode dan kelas untuk mengelola siswa')
                     ->icon('heroicon-o-calendar-days')
                     ->schema([
-                        Forms\Components\Select::make('periode_id')
+                Select::make('periode_id')
                             ->label('Periode')
                             ->options(self::getPeriodeOptions())
                             ->default(self::getActivePeriodeId())
-                            ->afterStateUpdated(function (Forms\Set $set, ?Model $record) {
+                    ->afterStateUpdated(function (Set $set, ?Model $record) {
                                 // Don't reset in edit mode
                                 if (!$record) {
                                     $set('kelas_id', null);
@@ -219,13 +243,13 @@ class KelasSiswaResource extends Resource
                             ->disabled(fn(?Model $record) => $record !== null)
                             ->helperText('Pilih periode akademik yang aktif'),
 
-                        Forms\Components\Select::make('kelas_id')
+                Select::make('kelas_id')
                             ->label('Kelas')
-                            ->options(function (Forms\Get $get, ?Model $record) {
+                    ->options(function (Get $get, ?Model $record) {
                                 $periodeId = $get('periode_id') ?? $record?->periode_id;
                                 return self::getKelasOptions($periodeId);
                             })
-                            ->afterStateUpdated(function (Forms\Set $set, ?Model $record) {
+                    ->afterStateUpdated(function (Set $set, ?Model $record) {
                                 // Don't reset in edit mode
                                 if (!$record) {
                                     $set('siswa_ids', null);
@@ -236,7 +260,7 @@ class KelasSiswaResource extends Resource
                             ->preload()
                             ->required()
                             ->live()
-                            ->disabled(function (Forms\Get $get, ?Model $record) {
+                    ->disabled(function (Get $get, ?Model $record) {
                                 // Disable in edit mode
                                 // if ($record !== null) {
                                 //     return true;
@@ -251,7 +275,7 @@ class KelasSiswaResource extends Resource
                     ->columns(2)
                     ->collapsible(),
 
-                Forms\Components\Section::make('Pilih Siswa')
+            Section::make('Pilih Siswa')
                     ->description(function (?Model $record) {
                         return $record
                             ? 'Informasi siswa yang terdaftar dalam kelas'
@@ -259,8 +283,8 @@ class KelasSiswaResource extends Resource
                     })
                     ->icon('heroicon-o-user-group')
                     ->schema([
-                        // Show current student info in edit/view mode
-                        Forms\Components\Placeholder::make('current_student_info')
+                // Show current student info in edit/view mode
+                Placeholder::make('current_student_info')
                             ->label('Siswa Terdaftar')
                             ->content(function (?Model $record): string {
                                 if (!$record || !$record->siswa) {
@@ -276,22 +300,22 @@ class KelasSiswaResource extends Resource
                             ->visible(fn(?Model $record) => $record !== null)
                             ->columnSpanFull(),
 
-                        // Toggle for selection mode (only in create mode)
-                        Forms\Components\Toggle::make('multiple_selection')
+                // Toggle for selection mode (only in create mode)
+                Toggle::make('multiple_selection')
                             ->label('Pilih Multiple Siswa')
                             ->default(true)
                             ->live()
-                            ->afterStateUpdated(function (Forms\Set $set) {
+                    ->afterStateUpdated(function (Set $set) {
                                 $set('siswa_ids', null);
                                 $set('siswa_id', null);
                             })
                             ->visible(fn(?Model $record) => $record === null)
                             ->helperText('Aktifkan untuk memilih lebih dari satu siswa sekaligus'),
 
-                        // Multiple selection (only in create mode)
-                        Forms\Components\Select::make('siswa_ids')
+                // Multiple selection (only in create mode)
+                Select::make('siswa_ids')
                             ->label('Pilih Siswa (Multiple)')
-                            ->options(function (Forms\Get $get, ?Model $record) {
+                    ->options(function (Get $get, ?Model $record) {
                                 if ($record) return [];
                                 return self::getAvailableSiswaOptions($get('kelas_id'), $get('periode_id'));
                             })
@@ -299,17 +323,17 @@ class KelasSiswaResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required(
-                                fn(Forms\Get $get, ?Model $record): bool =>
+                    fn(Get $get, ?Model $record): bool =>
                                 $record === null && $get('multiple_selection')
                             )
                             ->visible(
-                                fn(Forms\Get $get, ?Model $record): bool =>
+                    fn(Get $get, ?Model $record): bool =>
                                 $record === null && $get('multiple_selection')
                             )
-                            ->disabled(fn(Forms\Get $get): bool => !$get('kelas_id'))
+                    ->disabled(fn(Get $get): bool => !$get('kelas_id'))
                             ->helperText('Pilih satu atau lebih siswa yang belum memiliki kelas aktif')
                             ->live()
-                            ->getSearchResultsUsing(function (string $search, Forms\Get $get) {
+                    ->getSearchResultsUsing(function (string $search, Get $get) {
                                 if (!$get('kelas_id')) {
                                     return [];
                                 }
@@ -317,10 +341,10 @@ class KelasSiswaResource extends Resource
                             })
                             ->columnSpanFull(),
 
-                        // Single selection
-                        Forms\Components\Select::make('siswa_id')
+                // Single selection
+                Select::make('siswa_id')
                             ->label('Pilih Siswa')
-                            ->options(function (Forms\Get $get, ?Model $record) {
+                    ->options(function (Get $get, ?Model $record) {
                                 // In edit mode, include current student + available students
                                 if ($record) {
                                     $options = [];
@@ -340,15 +364,15 @@ class KelasSiswaResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required(
-                                fn(Forms\Get $get, ?Model $record): bool =>
+                    fn(Get $get, ?Model $record): bool =>
                                 $record !== null || ($record === null && !$get('multiple_selection'))
                             )
                             ->visible(
-                                fn(Forms\Get $get, ?Model $record): bool =>
+                    fn(Get $get, ?Model $record): bool =>
                                 $record !== null || ($record === null && !$get('multiple_selection'))
                             )
                             ->disabled(
-                                fn(Forms\Get $get, ?Model $record): bool =>
+                    fn(Get $get, ?Model $record): bool =>
                                 $record === null && !$get('kelas_id')
                             )
                             ->rules([
@@ -369,7 +393,7 @@ class KelasSiswaResource extends Resource
                                     : 'Pilih satu siswa yang belum memiliki kelas aktif';
                             })
                             ->live()
-                            ->getSearchResultsUsing(function (string $search, Forms\Get $get, ?Model $record) {
+                    ->getSearchResultsUsing(function (string $search, Get $get, ?Model $record) {
                                 $kelasId = $get('kelas_id') ?? $record?->kelas_id;
                                 $periodeId = $get('periode_id') ?? $record?->periode_id;
 
@@ -379,10 +403,10 @@ class KelasSiswaResource extends Resource
                                 return self::searchAvailableSiswa($search, $kelasId, $periodeId, $record);
                             }),
 
-                        // Display selected students count
-                        Forms\Components\Placeholder::make('selected_count')
+                // Display selected students count
+                Placeholder::make('selected_count')
                             ->label('Jumlah Siswa Dipilih')
-                            ->content(function (Forms\Get $get, ?Model $record) {
+                    ->content(function (Get $get, ?Model $record) {
                                 if ($record) {
                                     return '1 siswa terdaftar';
                                 }
@@ -401,7 +425,7 @@ class KelasSiswaResource extends Resource
                                 return '0 siswa dipilih';
                             })
                             ->visible(
-                                fn(Forms\Get $get, ?Model $record): bool =>
+                    fn(Get $get, ?Model $record): bool =>
                                 $record !== null ||
                                     ($get('multiple_selection') && !empty($get('siswa_ids'))) ||
                                     (!$get('multiple_selection') && !empty($get('siswa_id')))
@@ -409,11 +433,11 @@ class KelasSiswaResource extends Resource
                             ->columnSpanFull(),
                     ]),
 
-                Forms\Components\Section::make('Informasi Tambahan')
+            Section::make('Informasi Tambahan')
                     ->description('Informasi status dan tanggal masuk siswa')
                     ->icon('heroicon-o-information-circle')
                     ->schema([
-                        Forms\Components\Select::make('status')
+                Select::make('status')
                             ->label('Status')
                             ->options([
                                 'aktif' => 'Aktif',
@@ -430,7 +454,7 @@ class KelasSiswaResource extends Resource
                                     : 'Status ini akan diterapkan untuk semua siswa yang dipilih';
                             }),
 
-                        Forms\Components\DatePicker::make('tanggal_masuk')
+                DatePicker::make('tanggal_masuk')
                             ->label('Tanggal Masuk')
                             ->default(now())
                             ->required()
@@ -443,7 +467,7 @@ class KelasSiswaResource extends Resource
                                     : 'Tanggal masuk untuk semua siswa yang dipilih';
                             }),
 
-                        Forms\Components\Textarea::make('keterangan')
+                Textarea::make('keterangan')
                             ->label('Keterangan')
                             ->placeholder('Catatan tambahan (opsional)')
                             ->rows(3)
@@ -464,19 +488,20 @@ class KelasSiswaResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('siswa.foto')
+            ImageColumn::make('siswa.foto')
                     ->label('Foto')
                     ->circular()
                     ->size(50)
                     ->defaultImageUrl(url('/images/default-avatar.png'))
                     ->toggleable(isToggledHiddenByDefault: false),
 
-                Tables\Columns\TextColumn::make('siswa.nama_lengkap')
+            TextColumn::make('siswa.nama_lengkap')
                     ->label('Nama Siswa')
                     ->searchable(['nama_lengkap', 'nis'])
                     ->sortable()
                     ->weight(FontWeight::SemiBold)
-                    ->description(fn (KelasSiswa $record): string =>
+                ->description(
+                    fn(KelasSiswa $record): string =>
                         'NIS: ' . ($record->siswa?->nis ?? 'N/A')
                     )
                     ->formatStateUsing(function (KelasSiswa $record): string {
@@ -484,31 +509,27 @@ class KelasSiswaResource extends Resource
                     })
                     ->wrap(),
 
-                Tables\Columns\TextColumn::make('kelas.nama_kelas')
+            TextColumn::make('kelas.nama_kelas')
                     ->label('Kelas')
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color(function (KelasSiswa $record): string {
-                        // Different colors based on class name patterns or specific classes
-                        $namaKelas = $record->kelas?->nama_kelas ?? '';
+                // Different colors based on class name patterns or specific classes
+                $namaKelas = $record->kelas?->rentang_usia   ?? '';
 
-                        // Option 1: Color based on grade level
-                        if (str_contains($namaKelas, 'A') || str_contains($namaKelas, 'A')) {
+                // Option 1: Color based on grade level
+                if (str_contains($namaKelas, '2-3') || str_contains($namaKelas, '2-3    ')) {
                             return 'success'; // Green for grade 10
-                        } elseif (str_contains($namaKelas, 'B') || str_contains($namaKelas, 'B')) {
+                } elseif (str_contains($namaKelas, '4-5') || str_contains($namaKelas, '4-5')) {
                             return 'warning'; // Yellow for grade 11
-                        } elseif (str_contains($namaKelas, 'PG') || str_contains($namaKelas, 'PG')) {
+                } elseif (str_contains($namaKelas, '5-6') || str_contains($namaKelas, '5-6')) {
                             return 'danger'; // Red for grade 12
                         }
 
-                        // Option 2: Color based on class type/major
-                        if (str_contains(strtoupper($namaKelas), 'IPA')) {
-                            return 'info'; // Blue for IPA
-                        } elseif (str_contains(strtoupper($namaKelas), 'IPS')) {
-                            return 'warning'; // Yellow for IPS
-                        } elseif (str_contains(strtoupper($namaKelas), 'BAHASA')) {
-                            return 'success'; // Green for Bahasa
+                // Option 2: Color based on specific class names
+                if (str_contains($namaKelas, 'A') || str_contains($namaKelas, 'A')) {
+                    return 'primary';
                         }
 
                         // Option 3: Random colors based on class ID for variety
@@ -516,14 +537,14 @@ class KelasSiswaResource extends Resource
                         return $colors[($record->kelas_id ?? 0) % count($colors)];
                     })
                     ->icon(function (KelasSiswa $record): string {
-                        $namaKelas = $record->kelas?->nama_kelas ?? '';
+                $namaKelas = $record->kelas?->rentang_usia ?? '';
 
-                        // Different icons based on class
-                        if (str_contains($namaKelas, 'A') || str_contains($namaKelas, 'A')) {
+                // Different icons based on class
+                if (str_contains($namaKelas, '2-3') || str_contains($namaKelas, '2-3')) {
                             return 'heroicon-m-academic-cap';
-                        } elseif (str_contains($namaKelas, 'B') || str_contains($namaKelas, 'B')) {
+                } elseif (str_contains($namaKelas, '4-5') || str_contains($namaKelas, '4-5')) {
                             return 'heroicon-m-book-open';
-                        } elseif (str_contains($namaKelas, 'PG') || str_contains($namaKelas, 'PG')) {
+                } elseif (str_contains($namaKelas, '5-6') || str_contains($namaKelas, '5-6')) {
                             return 'heroicon-m-trophy';
                         }
 
@@ -535,80 +556,87 @@ class KelasSiswaResource extends Resource
 
                         // Add additional info to the display
                         if ($record->kelas?->kapasitas) {
-                            $currentCount = \App\Models\KelasSiswa::where('kelas_id', $record->kelas_id)
+                    $currentCount = KelasSiswa::where('kelas_id', $record->kelas_id)
                                 ->where('status', 'aktif')
                                 ->count();
                             return $namaKelas . " ({$currentCount}/{$record->kelas->kapasitas})";
                         }
 
                         return $namaKelas;
-                    }),
+                })
+                ->description(
+                    fn(KelasSiswa $record): string =>
+                    'Rentang Usia: ' . ($record->kelas?->rentang_usia ?? 'N/A')
+                ),
 
-                Tables\Columns\TextColumn::make('periode.nama_periode')
+            TextColumn::make('periode.nama_periode')
                     ->label('Periode')
                     ->searchable()
                     ->sortable()
                     ->wrap()
                     ->toggleable()
-                    ->description(fn (KelasSiswa $record): string =>
+                ->description(
+                    fn(KelasSiswa $record): string =>
                         'Semester: ' . ucfirst($record->periode?->semester ?? 'N/A')
                     ),
 
-                Tables\Columns\TextColumn::make('periode.tahun_ajaran')
+            TextColumn::make('periode.tahun_ajaran')
                     ->label('Tahun Ajaran')
                     ->sortable()
                     ->badge()
-                    ->color(fn (KelasSiswa $record): string =>
+                ->color(
+                    fn(KelasSiswa $record): string =>
                         $record->periode?->is_active ? 'success' : 'gray'
                     )
-                    ->formatStateUsing(fn (KelasSiswa $record): string =>
+                ->formatStateUsing(
+                    fn(KelasSiswa $record): string =>
                         $record->periode?->tahun_ajaran . ($record->periode?->is_active ? ' (Aktif)' : '')
                     )
-                    ->icon(fn (KelasSiswa $record): string =>
+                ->icon(
+                    fn(KelasSiswa $record): string =>
                         $record->periode?->is_active ? 'heroicon-m-check-circle' : 'heroicon-m-clock'
                     ),
 
-                Tables\Columns\TextColumn::make('periode.semester')
+            TextColumn::make('periode.semester')
                     ->label('Semester')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
+                ->color(fn(?string $state): string => match ($state) {
                         'ganjil' => 'info',
                         'genap' => 'warning',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (?string $state): string => $state ? ucfirst($state) : 'N/A')
-                    ->toggleable(),
+                ->formatStateUsing(fn(?string $state): string => $state ? ucfirst($state) : 'N/A'),
 
-                Tables\Columns\TextColumn::make('status')
+            TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                ->color(fn(string $state): string => match ($state) {
                         'aktif' => 'success',
                         'pindah' => 'warning',
                         'lulus' => 'info',
                         'keluar' => 'danger',
                         default => 'gray',
                     })
-                    ->icon(fn (string $state): string => match ($state) {
+                ->icon(fn(string $state): string => match ($state) {
                         'aktif' => 'heroicon-m-check-circle',
                         'pindah' => 'heroicon-m-arrow-right-circle',
                         'lulus' => 'heroicon-m-academic-cap',
                         'keluar' => 'heroicon-m-x-circle',
                         default => 'heroicon-m-question-mark-circle',
                     })
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
+                ->formatStateUsing(fn(string $state): string => ucfirst($state)),
 
-                Tables\Columns\TextColumn::make('tanggal_masuk')
+            TextColumn::make('tanggal_masuk')
                     ->label('Tanggal Masuk')
                     ->date('d M Y')
                     ->sortable()
                     ->toggleable()
                     ->icon('heroicon-m-calendar'),
 
-                Tables\Columns\TextColumn::make('keterangan')
+            TextColumn::make('keterangan')
                     ->label('Keterangan')
                     ->limit(30)
-                    ->tooltip(function (Tables\Columns\TextColumn $column): ?string {
+                ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
                         if (strlen($state) > 30) {
                             return $state;
@@ -618,14 +646,14 @@ class KelasSiswaResource extends Resource
                     ->placeholder('Tidak ada keterangan')
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('created_at')
+            TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->since(),
 
-                Tables\Columns\TextColumn::make('updated_at')
+            TextColumn::make('updated_at')
                     ->label('Diperbarui')
                     ->dateTime('d M Y H:i')
                     ->sortable()
@@ -633,7 +661,7 @@ class KelasSiswaResource extends Resource
                     ->since(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('periode_id')
+            SelectFilter::make('periode_id')
                     ->label('Periode')
                     ->relationship('periode', 'nama_periode')
                     ->searchable()
@@ -642,14 +670,14 @@ class KelasSiswaResource extends Resource
                     ->default([self::getActivePeriodeId()]),
 
 
-                Tables\Filters\SelectFilter::make('kelas_id')
+            SelectFilter::make('kelas_id')
                     ->label('Kelas')
                     ->relationship('kelas', 'nama_kelas')
                     ->searchable()
                     ->preload()
                     ->multiple(),
 
-                Tables\Filters\SelectFilter::make('status')
+            SelectFilter::make('status')
                     ->label('Status')
                     ->options([
                         'aktif' => 'Aktif',
@@ -660,22 +688,25 @@ class KelasSiswaResource extends Resource
                     ->multiple()
                     ->default(['aktif']),
 
-                Tables\Filters\Filter::make('active_periode')
+            Filter::make('active_periode')
                     ->label('Periode Aktif')
-                    ->query(fn (Builder $query): Builder =>
-                        $query->whereHas('periode', fn (Builder $q) =>
+                ->query(
+                    fn(Builder $query): Builder =>
+                    $query->whereHas(
+                        'periode',
+                        fn(Builder $q) =>
                             $q->where('is_active', true)
                         )
                     )
                     ->toggle()
                     ->default(true),
 
-                Tables\Filters\Filter::make('tanggal_masuk')
-                    ->form([
-                        Forms\Components\DatePicker::make('dari_tanggal')
+            Filter::make('tanggal_masuk')
+                ->schema([
+                    DatePicker::make('dari_tanggal')
                             ->label('Dari Tanggal')
                             ->native(false),
-                        Forms\Components\DatePicker::make('sampai_tanggal')
+                DatePicker::make('sampai_tanggal')
                             ->label('Sampai Tanggal')
                             ->native(false),
                     ])
@@ -683,58 +714,60 @@ class KelasSiswaResource extends Resource
                         return $query
                             ->when(
                                 $data['dari_tanggal'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal_masuk', '>=', $date),
+                    fn(Builder $query, $date): Builder => $query->whereDate('tanggal_masuk', '>=', $date),
                             )
                             ->when(
                                 $data['sampai_tanggal'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal_masuk', '<=', $date),
+                    fn(Builder $query, $date): Builder => $query->whereDate('tanggal_masuk', '<=', $date),
                             );
                     })
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
 
                         if ($data['dari_tanggal'] ?? null) {
-                            $indicators[] = 'Dari: ' . \Carbon\Carbon::parse($data['dari_tanggal'])->format('d M Y');
+                    $indicators[] = 'Dari: ' . Carbon::parse($data['dari_tanggal'])->format('d M Y');
                         }
 
                         if ($data['sampai_tanggal'] ?? null) {
-                            $indicators[] = 'Sampai: ' . \Carbon\Carbon::parse($data['sampai_tanggal'])->format('d M Y');
+                    $indicators[] = 'Sampai: ' . Carbon::parse($data['sampai_tanggal'])->format('d M Y');
                         }
 
                         return $indicators;
                     }),
 
             ])
-            ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
 
-                    // Add Pindah Kelas Action
-                    Tables\Actions\Action::make('pindah_kelas')
+                // Add Pindah Kelas Action
+                Action::make('pindah_kelas')
                         ->label('Pindah Kelas')
                         ->icon('heroicon-o-arrow-right-circle')
                         ->color('warning')
-                        ->visible(fn (KelasSiswa $record): bool => $record->status === 'aktif')
-                        ->form([
-                            Forms\Components\Section::make('Informasi Siswa')
-                                ->schema([
-                                    Forms\Components\Placeholder::make('siswa_info')
+                    ->visible(fn(KelasSiswa $record): bool => $record->status === 'aktif')
+                    ->schema([
+                    Section::make('Informasi Siswa')
+                        ->schema([
+                            Placeholder::make('siswa_info')
                                         ->label('Siswa')
-                                        ->content(fn (KelasSiswa $record): string =>
+                            ->content(
+                                fn(KelasSiswa $record): string =>
                                             $record->siswa->nama_lengkap . ' (NIS: ' . $record->siswa->nis . ')'
                                         ),
-                                    Forms\Components\Placeholder::make('kelas_asal')
+                        Placeholder::make('kelas_asal')
                                         ->label('Kelas Asal')
-                                        ->content(fn (KelasSiswa $record): string =>
+                            ->content(
+                                fn(KelasSiswa $record): string =>
                                             $record->kelas->nama_kelas
                                         ),
                                 ])
                                 ->columns(2),
 
-                            Forms\Components\Section::make('Tujuan Pindah')
+                    Section::make('Tujuan Pindah')
                                 ->schema([
-                                    Forms\Components\Select::make('kelas_tujuan_id')
+                        Select::make('kelas_tujuan_id')
                                         ->label('Kelas Tujuan')
                                         ->options(function (KelasSiswa $record) {
                                             return Kelas::where('periode_id', $record->periode_id)
@@ -747,7 +780,7 @@ class KelasSiswaResource extends Resource
                                         ->preload()
                                         ->helperText('Pilih kelas tujuan untuk perpindahan'),
 
-                                    Forms\Components\Select::make('alasan_pindah')
+                        Select::make('alasan_pindah')
                                         ->label('Alasan Pindah')
                                         ->options([
                                             'Permintaan Orang Tua' => 'Permintaan Orang Tua',
@@ -759,7 +792,7 @@ class KelasSiswaResource extends Resource
                                         ->required()
                                         ->native(false),
 
-                                    Forms\Components\Textarea::make('catatan')
+                        Textarea::make('catatan')
                                         ->label('Catatan')
                                         ->placeholder('Catatan tambahan (opsional)')
                                         ->rows(3)
@@ -783,16 +816,14 @@ class KelasSiswaResource extends Resource
                             } else {
 
                                 notyf()->error(' Perpindahan kelas gagal dilakukan, Kelas sudah penuh');
-                            }
-
-
+                    }
                         })
                         ->requiresConfirmation()
                         ->modalHeading('Pindah Kelas Siswa')
                         ->modalDescription('Pastikan data perpindahan kelas sudah benar sebelum melanjutkan.')
                         ->modalSubmitActionLabel('Pindahkan'),
 
-                    Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                         ->requiresConfirmation()
                         ->modalDescription('Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.'),
                 ])
@@ -802,17 +833,17 @@ class KelasSiswaResource extends Resource
                 ->color('gray')
                 ->button(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
                         ->requiresConfirmation()
                         ->modalDescription('Apakah Anda yakin ingin menghapus data yang dipilih? Tindakan ini tidak dapat dibatalkan.'),
 
-                    Tables\Actions\BulkAction::make('update_status')
+                BulkAction::make('update_status')
                         ->label('Update Status')
                         ->icon('heroicon-o-pencil-square')
                         ->form([
-                            Forms\Components\Select::make('status')
+                    Select::make('status')
                                 ->label('Status Baru')
                                 ->options([
                                     'aktif' => 'Aktif',
@@ -832,7 +863,7 @@ class KelasSiswaResource extends Resource
                         ->modalDescription('Status akan diubah untuk semua data yang dipilih.')
                         ->color('warning'),
 
-                    Tables\Actions\BulkAction::make('export')
+                BulkAction::make('export')
                         ->label('Export Data')
                         ->icon('heroicon-o-arrow-down-tray')
                         ->action(function ($records) {
@@ -865,10 +896,10 @@ class KelasSiswaResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListKelasSiswas::route('/'),
-            'create' => Pages\CreateKelasSiswa::route('/create'),
-            'view' => Pages\ViewKelasSiswa::route('/{record}'),
-            'edit' => Pages\EditKelasSiswa::route('/{record}/edit'),
+            'index' => ListKelasSiswas::route('/'),
+            'create' => CreateKelasSiswa::route('/create'),
+            'view' => ViewKelasSiswa::route('/{record}'),
+            'edit' => EditKelasSiswa::route('/{record}/edit'),
         ];
     }
 
@@ -914,7 +945,7 @@ class KelasSiswaResource extends Resource
                 ->orderBy('nama_kelas')
                 ->pluck('nama_kelas', 'id')
                 ->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to load kelas options: ' . $e->getMessage());
             return [];
         }
@@ -938,7 +969,7 @@ class KelasSiswaResource extends Resource
                 if ($currentRecord) {
                     $subQuery->where(function ($query) use ($currentRecord) {
                         $query->where('siswa_id', '!=', $currentRecord->siswa_id)
-                              ->orWhereNull('siswa_id');
+                        ->orWhereNull('siswa_id');
                     });
                 }
             })
@@ -1034,5 +1065,4 @@ class KelasSiswaResource extends Resource
 
         return static::getModel()::count();
     }
-
 }

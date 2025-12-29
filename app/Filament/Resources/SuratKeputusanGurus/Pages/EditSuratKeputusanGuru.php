@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\SuratKeputusanGuruResource\Pages;
+namespace App\Filament\Resources\SuratKeputusanGurus\Pages;
 
-use App\Filament\Resources\SuratKeputusanGuruResource;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\SuratKeputusanGurus\SuratKeputusanGuruResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -13,7 +14,7 @@ class EditSuratKeputusanGuru extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

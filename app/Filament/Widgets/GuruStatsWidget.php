@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\User;
 use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\Nilai;
@@ -17,7 +18,7 @@ class GuruStatsWidget extends BaseWidget
     protected static bool $isLazy = false;
     public static function canView(): bool
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return $user && $user->isAdmin();
     }

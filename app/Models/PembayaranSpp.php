@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Filament\Resources\PembayaranSpps\PembayaranSppResource;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -38,12 +40,12 @@ class PembayaranSpp extends Model
 
     public function kelas()
     {
-        return $this->belongsTo(\App\Models\Kelas::class);
+        return $this->belongsTo(Kelas::class);
     }
 
     public function guru()
     {
-        return $this->belongsTo(\App\Models\Guru::class);
+        return $this->belongsTo(Guru::class);
     }
 
     /**
@@ -71,7 +73,7 @@ class PembayaranSpp extends Model
 
         // Fallback: try to get price using the static method from resource
         if ($this->periode_id && $this->kelas_id) {
-            return \App\Filament\Resources\PembayaranSppResource::getHargaSppForKelas(
+            return PembayaranSppResource::getHargaSppForKelas(
                 $this->periode_id,
                 $this->kelas_id
             );
@@ -203,7 +205,7 @@ class PembayaranSpp extends Model
                     $originalPayment->save();
 
                     // Log the status update for debugging
-                    \Illuminate\Support\Facades\Log::info('Original payment status updated to LUNAS', [
+                    Log::info('Original payment status updated to LUNAS', [
                         'original_payment_id' => $originalPayment->id,
                         'original_invoice' => $originalPayment->no_inv,
                         'remaining_payment_id' => $this->id,
@@ -247,7 +249,7 @@ class PembayaranSpp extends Model
 
                 $this->save();
 
-                \Illuminate\Support\Facades\Log::info('Payment status updated to LUNAS through remaining payments check', [
+                Log::info('Payment status updated to LUNAS through remaining payments check', [
                     'payment_id' => $this->id,
                     'invoice' => $this->no_inv,
                     'total_paid' => $totalPaid,

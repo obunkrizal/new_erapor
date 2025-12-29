@@ -2,18 +2,18 @@
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Forms\Components\Component;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Component;
+use App\Models\User;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Pages\Auth\Login as BaseLogin;
 use Illuminate\Validation\ValidationException;
 
-class Login extends BaseLogin
+class Login extends \Filament\Auth\Pages\Login
 {
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 $this->getEmailFormComponent(),
                 $this->getPasswordFormComponent(),
                 $this->getRememberFormComponent(),
@@ -38,6 +38,7 @@ class Login extends BaseLogin
             ->label(__('filament-panels::pages/auth/login.form.password.label'))
             ->password()
             ->required()
+            ->revealable(true)
             ->extraInputAttributes(['tabindex' => 2]);
     }
 
@@ -53,7 +54,7 @@ class Login extends BaseLogin
     protected function throwFailureValidationException(): never
     {
         // Check if user exists but is inactive
-        $user = \App\Models\User::where('email', $this->data['email'])->first();
+        $user = User::where('email', $this->data['email'])->first();
 
         if ($user && !$user->is_active) {
             throw ValidationException::withMessages([

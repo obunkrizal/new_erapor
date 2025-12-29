@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\KelasSiswaResource\Pages;
+namespace App\Filament\Resources\KelasSiswas\Pages;
 
-use App\Filament\Resources\KelasSiswaResource;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\KelasSiswas\KelasSiswaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -13,8 +15,8 @@ class ViewKelasSiswa extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
-            Actions\DeleteAction::make(),
+            EditAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

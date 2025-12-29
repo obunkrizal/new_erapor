@@ -1,29 +1,49 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\Kelas;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Placeholder;
+use Filament\Tables\Columns\TextColumn;
+use Exception;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Notifications\Notification;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\Kelas\Pages\ListKelas;
+use App\Filament\Resources\Kelas\Pages\CreateKelas;
+use App\Filament\Resources\Kelas\Pages\EditKelas;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Kelas;
 use App\Models\Guru;
 use App\Models\Periode;
-use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\KelasResource\Pages;
-use Filament\Tables\Actions\ActionGroup;
 
 class KelasResource extends Resource
 {
     protected static ?string $model = Kelas::class;
-    protected static ?string $navigationIcon = 'heroicon-o-building-library';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-building-library';
     protected static ?string $navigationLabel = 'Manajemen Kelas';
     protected static ?string $modelLabel = 'Kelas';
     protected static ?string $pluralModelLabel = 'Manajemen Kelas';
-    protected static ?string $navigationGroup = 'Data Master';
-    protected static ?int $navigationSort = 2;
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Master';
+    protected static ?int $navigationSort = 3;
 
     // Show navigation only for admin
     public static function shouldRegisterNavigation(): bool
@@ -37,24 +57,33 @@ class KelasResource extends Resource
         return Auth::user()?->isAdmin() ?? false;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Informasi Kelas')
-                    ->description('Data dasar kelas dan pengaturan')
-                    ->icon('heroicon-o-building-library')
+        return $schema
+            ->components([
+                Section::make('Informasi Kelas Siswa')
+                    ->description('Data Kelas')
                     ->schema([
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                Forms\Components\TextInput::make('nama_kelas')
+                Grid::make(2)
+                    ->schema([
+                    TextInput::make('nama_kelas')
                                     ->label('Nama Kelas')
                                     ->required()
                                     ->maxLength(100)
                                     ->placeholder('Contoh: Kelas A, 1A, dll')
                                     ->unique(ignoreRecord: true),
+                    Select::make('rentang_usia')
+                        ->label('Rentang Usia')
+                        ->options([
+                            '2-3' => 'Playgroup',
+                            '4-5' => 'PAUD A (4-5 Tahun)',
+                            '5-6' => 'PAUD B (5-6 Tahun)',
+                        ])
+                        ->searchable()
+                        ->required()
+                        ->placeholder('Pilih rentang usia'),
 
-                                Forms\Components\TextInput::make('kapasitas')
+                    TextInput::make('kapasitas')
                                     ->label('Kapasitas Kelas')
                                     ->required()
                                     ->numeric()
@@ -65,7 +94,7 @@ class KelasResource extends Resource
                                     ->helperText('Jumlah maksimal siswa yang dapat diterima')
                                     ->suffixIcon('heroicon-m-users'),
 
-                                Forms\Components\Select::make('guru_id')
+                    Select::make('guru_id')
                                     ->label('Wali Kelas')
                                     ->relationship('guru', 'nama_guru')
                                     ->searchable()
@@ -73,7 +102,7 @@ class KelasResource extends Resource
                                     ->required()
                                     ->placeholder('Pilih wali kelas'),
 
-                                Forms\Components\Select::make('periode_id')
+                    Select::make('periode_id')
                                     ->label('Periode Akademik')
                                     ->relationship('periode', 'nama_periode')
                                     ->searchable()
@@ -82,7 +111,7 @@ class KelasResource extends Resource
                                     ->placeholder('Pilih periode akademik')
                                     ->default(fn() => Periode::where('is_active', true)->value('id')),
 
-                                Forms\Components\Select::make('status')
+                    Select::make('status')
                                     ->label('Status Kelas')
                                     ->options([
                                         'aktif' => 'Aktif',
@@ -93,17 +122,17 @@ class KelasResource extends Resource
                                     ->required()
                                     ->native(false),
 
-
-                            ]),
                     ]),
+                ])
+                ->columnSpan(2),
 
-                Forms\Components\Section::make('Statistik Kelas')
+            Section::make('Statistik Kelas')
                     ->description('Informasi kapasitas dan siswa')
                     ->icon('heroicon-o-chart-bar')
                     ->schema([
-                        Forms\Components\Grid::make(3)
+                Grid::make(3)
                             ->schema([
-                                Forms\Components\Placeholder::make('jumlah_siswa')
+                    Placeholder::make('jumlah_siswa')
                                     ->label('Jumlah Siswa Aktif')
                                     ->content(function (?Kelas $record) {
                                         if (!$record) return '0 siswa';
@@ -111,7 +140,7 @@ class KelasResource extends Resource
                                         return "{$count} siswa";
                                     }),
 
-                                Forms\Components\Placeholder::make('sisa_kapasitas')
+                    Placeholder::make('sisa_kapasitas')
                                     ->label('Sisa Kapasitas')
                                     ->content(function (?Kelas $record) {
                                         if (!$record) return '-';
@@ -120,7 +149,7 @@ class KelasResource extends Resource
                                         return "{$sisa} siswa";
                                     }),
 
-                                Forms\Components\Placeholder::make('persentase_kapasitas')
+                    Placeholder::make('persentase_kapasitas')
                                     ->label('Persentase Terisi')
                                     ->content(function (?Kelas $record) {
                                         if (!$record || $record->kapasitas == 0) return '0%';
@@ -139,7 +168,7 @@ class KelasResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nama_kelas')
+            TextColumn::make('nama_kelas')
                     ->label('Nama Kelas')
                     ->searchable()
                     ->sortable()
@@ -147,26 +176,47 @@ class KelasResource extends Resource
                     ->badge()
                     ->color('primary')
                     ->icon('heroicon-o-academic-cap'),
+            TextColumn::make('rentang_usia')
+                ->label('Rentang Usia')
+                ->formatStateUsing(fn(string $state): string => match ($state) {
+                    '2-3' => 'Playgroup (2-3 Tahun)',
+                    '4-5' => 'PAUD A (4-5 Tahun)',
+                    '5-6' => 'PAUD B (5-6 Tahun)',
+                    default => 'Tidak Diketahui',
+                })
+                ->searchable()
+                ->sortable()
+                ->weight('bold')
+                ->badge()
+                ->color(fn(string $state): string => match ($state) {
+                    '2-3' => 'warning',
+                    '4-5' => 'success',
+                    '5-6' => 'info',
+                    default => 'gray',
+                })
+                ->icon('heroicon-o-adjustments-horizontal'),
 
-                Tables\Columns\TextColumn::make('guru.nama_guru')
+            TextColumn::make('guru.nama_guru')
                     ->label('Wali Kelas')
                     ->searchable()
                     ->sortable()
-                    ->description(fn(Kelas $record): string =>
+                ->description(
+                    fn(Kelas $record): string =>
                         $record->guru?->nip ? "NIP: {$record->guru->nip}" : "Belum ada NIP"
                     )
                     ->wrap(),
 
-                Tables\Columns\TextColumn::make('periode.nama_periode')
+            TextColumn::make('periode.nama_periode')
                     ->label('Periode')
                     ->badge()
                     ->color('success')
-                    ->description(fn(Kelas $record): string =>
+                ->description(
+                    fn(Kelas $record): string =>
                         "Tahun: {$record->periode?->tahun_ajaran}"
                     )
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('kapasitas')
+            TextColumn::make('kapasitas')
                     ->label('Kapasitas')
                     ->alignCenter()
                     ->badge()
@@ -174,7 +224,7 @@ class KelasResource extends Resource
                     ->formatStateUsing(fn($state) => "{$state} siswa")
                     ->sortable(),
 
-            Tables\Columns\TextColumn::make('siswa_aktif_count')
+            TextColumn::make('siswa_aktif_count')
                 ->label('Siswa Aktif')
                 ->alignCenter()
                 ->badge()
@@ -183,14 +233,14 @@ class KelasResource extends Resource
                 ->getStateUsing(function ($record) {
                     try {
                         return $record->kelasSiswa()->where('status', 'aktif')->count();
-                    } catch (\Exception $e) {
+                } catch (Exception $e) {
                         return 0;
                     }
                 })
                 ->sortable(false),
 
 
-            Tables\Columns\TextColumn::make('sisa_kapasitas')
+            TextColumn::make('sisa_kapasitas')
                     ->label('Sisa Kapasitas')
                     ->alignCenter()
                     ->badge()
@@ -212,7 +262,7 @@ class KelasResource extends Resource
                     })
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('status')
+            TextColumn::make('status')
                     ->label('Status')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -223,25 +273,25 @@ class KelasResource extends Resource
                     })
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('created_at')
+            TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('guru_id')
+            SelectFilter::make('guru_id')
                     ->label('Wali Kelas')
                     ->relationship('guru', 'nama_guru')
                     ->searchable()
                     ->preload(),
 
-                Tables\Filters\SelectFilter::make('periode_id')
+            SelectFilter::make('periode_id')
                     ->label('Periode')
                     ->relationship('periode', 'nama_periode')
                     ->default(fn() => Periode::where('is_active', true)->value('id')),
 
-                Tables\Filters\SelectFilter::make('status')
+            SelectFilter::make('status')
                     ->label('Status Kelas')
                     ->options([
                         'aktif' => 'Aktif',
@@ -250,33 +300,36 @@ class KelasResource extends Resource
                     ])
                     ->default('aktif'),
 
-                Tables\Filters\Filter::make('kapasitas_penuh')
+            Filter::make('kapasitas_penuh')
                     ->label('Kapasitas Penuh')
-                    ->query(fn(Builder $query): Builder =>
+                ->query(
+                    fn(Builder $query): Builder =>
                         $query->whereRaw('(SELECT COUNT(*) FROM kelas_siswa WHERE kelas_id = kelas.id AND status = "aktif") >= kapasitas')
                     )
                     ->toggle(),
 
-                Tables\Filters\Filter::make('hampir_penuh')
+            Filter::make('hampir_penuh')
                     ->label('Hampir Penuh (≥90%)')
-                    ->query(fn(Builder $query): Builder =>
+                ->query(
+                    fn(Builder $query): Builder =>
                         $query->whereRaw('(SELECT COUNT(*) FROM kelas_siswa WHERE kelas_id = kelas.id AND status = "aktif") >= (kapasitas * 0.9)')
                     )
                     ->toggle(),
 
-                Tables\Filters\Filter::make('masih_kosong')
+            Filter::make('masih_kosong')
                     ->label('Masih Kosong')
-                    ->query(fn(Builder $query): Builder =>
+                ->query(
+                    fn(Builder $query): Builder =>
                         $query->whereRaw('(SELECT COUNT(*) FROM kelas_siswa WHERE kelas_id = kelas.id AND status = "aktif") = 0')
                     )
                     ->toggle(),
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
 
-                Tables\Actions\Action::make('manage_students')
+                Action::make('manage_students')
                     ->label('Kelola Siswa')
                     ->icon('heroicon-o-users')
                     ->color('info')
@@ -287,7 +340,7 @@ class KelasResource extends Resource
                         ])
                         ),
 
-                Tables\Actions\Action::make('view_assessments')
+                Action::make('view_assessments')
                     ->label('Lihat Penilaian')
                     ->icon('heroicon-o-clipboard-document-check')
                     ->color('success')
@@ -298,7 +351,7 @@ class KelasResource extends Resource
                         ])
                         ),
 
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->requiresConfirmation()
                     ->modalHeading('Hapus Kelas')
                     ->modalDescription('Apakah Anda yakin ingin menghapus kelas ini?')
@@ -310,14 +363,14 @@ class KelasResource extends Resource
                 ->color('gray')
                 ->button(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('update_kapasitas')
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('update_kapasitas')
                         ->label('Update Kapasitas')
                         ->icon('heroicon-o-users')
                         ->color('info')
                         ->form([
-                            Forms\Components\TextInput::make('kapasitas')
+                    TextInput::make('kapasitas')
                                 ->label('Kapasitas Baru')
                                 ->numeric()
                                 ->required()
@@ -328,14 +381,14 @@ class KelasResource extends Resource
                         ->action(function (array $data, $records) {
                             $records->each(fn($record) => $record->update(['kapasitas' => $data['kapasitas']]));
 
-                            \Filament\Notifications\Notification::make()
+                    Notification::make()
                                 ->title('Berhasil')
                                 ->body(count($records) . ' kelas berhasil diupdate kapasitasnya')
                                 ->success()
                                 ->send();
                         }),
 
-                    Tables\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
@@ -344,9 +397,9 @@ class KelasResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListKelas::route('/'),
-            'create' => Pages\CreateKelas::route('/create'),
-            'edit' => Pages\EditKelas::route('/{record}/edit'),
+            'index' => ListKelas::route('/'),
+            'create' => CreateKelas::route('/create'),
+            'edit' => EditKelas::route('/{record}/edit'),
         ];
     }
 

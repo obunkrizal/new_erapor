@@ -1,8 +1,11 @@
 <?php
 
-namespace App\Filament\Resources\SuratKeputusanGuruResource\Pages;
+namespace App\Filament\Resources\SuratKeputusanGurus\Pages;
 
-use App\Filament\Resources\SuratKeputusanGuruResource;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\SuratKeputusanGurus\SuratKeputusanGuruResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -13,23 +16,23 @@ class ViewSuratKeputusanGuru extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('print')
+            Action::make('print')
                 ->label('Cetak Surat')
                 ->icon('heroicon-o-printer')
                 ->color('success')
                 ->url(fn (): string => route('surat-keputusan.print', $this->record))
                 ->openUrlInNewTab(),
 
-            Actions\Action::make('download')
+            Action::make('download')
                 ->label('Unduh PDF')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('primary')
                 ->url(fn (): string => route('surat-keputusan.download', $this->record)),
 
-            Actions\EditAction::make()
+            EditAction::make()
                 ->icon('heroicon-o-pencil-square'),
 
-            Actions\DeleteAction::make()
+            DeleteAction::make()
                 ->icon('heroicon-o-trash'),
         ];
     }

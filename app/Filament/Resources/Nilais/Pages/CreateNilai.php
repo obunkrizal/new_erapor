@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Filament\Resources\NilaiResource\Pages;
+namespace App\Filament\Resources\Nilais\Pages;
 
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Filament\Notifications\Notification;
-use App\Filament\Resources\NilaiResource;
+use App\Filament\Resources\Nilais\NilaiResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Filament\Actions;
@@ -50,7 +51,7 @@ class CreateNilai extends CreateRecord
             ]);
 
             return $processedData;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Create Nilai error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\View\View;
 use App\Models\Siswa;
 use App\Models\Sekolah;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class PembayaranSppPrintController extends Controller
      * Display the invoice for the given PembayaranSpp record.
      *
      * @param int $id
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function printInvoice($id)
     {

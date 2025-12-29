@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\SignatureDateResource\Pages;
+namespace App\Filament\Resources\SignatureDates\Pages;
 
-use App\Filament\Resources\SignatureDateResource;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\SignatureDates\SignatureDateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -18,7 +19,7 @@ class EditSignatureDate extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

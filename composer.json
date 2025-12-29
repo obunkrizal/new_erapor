@@ -8,8 +8,7 @@
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
-        "cwsps154/app-settings": "^1.0",
-        "filament/filament": "^3.3",
+        "filament/filament": "~4.0",
         "intervention/image": "^3.11",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.1",
@@ -17,11 +16,11 @@
         "laravolt/indonesia": "^0.36.0",
         "maatwebsite/excel": "^3.1",
         "milon/barcode": "^12.0",
-        "php-flasher/flasher-notyf-laravel": "^2.1",
-        "teguh02/indonesia-territory-forms": "^1.1"
+        "php-flasher/flasher-notyf-laravel": "^2.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "filament/upgrade": "^4.0",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.13",
         "laravel/sail": "^1.41",

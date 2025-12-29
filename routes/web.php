@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Exports\SiswaImportTemplateExport;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Filament\Resources\SiswaResource\Pages\PrintReport;
+use App\Filament\Resources\Siswas\Pages\PrintReport;
 use App\Http\Controllers\PembayaranSppReportController;
-use App\Filament\Resources\NilaiResource\Pages\NilaiStats;
+use App\Filament\Resources\Nilais\Pages\NilaiStats;
 use App\Http\Controllers\PrintSuratKeputusanController;
 use App\Http\Controllers\PembayaranSppPrintController;
 use App\Http\Controllers\GuruPrintController;

@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\GuruNilaiResource\Pages;
+namespace App\Filament\Resources\GuruNilais\Pages;
 
+use App\Models\Kelas;
+use Filament\Actions\Action;
 use Filament\Actions;
 use Filament\Notifications\Notification;
-use App\Filament\Resources\NilaiResource;
+use App\Filament\Resources\Nilais\NilaiResource;
 use Filament\Resources\Pages\CreateRecord;
-use App\Filament\Resources\GuruNilaiResource;
+use App\Filament\Resources\GuruNilais\GuruNilaiResource;
 
 class CreateGuruNilai extends CreateRecord
 {
@@ -45,7 +47,7 @@ class CreateGuruNilai extends CreateRecord
 
         // Set periode_id if not already set
         if (empty($data['periode_id']) && !empty($data['kelas_id'])) {
-            $kelas = \App\Models\Kelas::find($data['kelas_id']);
+            $kelas = Kelas::find($data['kelas_id']);
             $data['periode_id'] = $kelas?->periode_id;
         }
 
@@ -55,7 +57,7 @@ class CreateGuruNilai extends CreateRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('back')
+            Action::make('back')
                 ->label('Kembali')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')

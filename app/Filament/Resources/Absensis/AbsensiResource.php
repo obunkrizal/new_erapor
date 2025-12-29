@@ -1,7 +1,26 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\Absensis;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Utilities\Get;
+use Exception;
+use Carbon\Carbon;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\Absensis\Pages\ListAbsensis;
+use App\Filament\Resources\Absensis\Pages\CreateAbsensi;
+use App\Filament\Resources\Absensis\Pages\EditAbsensi;
 use Closure;
 use Filament\Forms;
 use Filament\Tables;
@@ -9,7 +28,6 @@ use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\Absensi;
 use App\Models\Periode;
-use Filament\Forms\Form;
 use App\Models\KelasSiswa;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
@@ -17,12 +35,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
@@ -32,7 +48,7 @@ class AbsensiResource extends Resource
 {
     protected static ?string $model = Absensi::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-calendar-days';
 
     protected static ?string $navigationLabel = 'Manajemen Absensi';
 
@@ -40,7 +56,7 @@ class AbsensiResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Data Absensi';
 
-    protected static ?string $navigationGroup = 'Data Master';
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Master';
 
     protected static ?int $navigationSort = 3;
 
@@ -56,10 +72,10 @@ class AbsensiResource extends Resource
         return Auth::check() && Auth::user()->isGuru();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 // Hidden field to store record ID for edit mode
                 Hidden::make('record_id')
                     ->default(fn(?Model $record) => $record?->id),
@@ -91,14 +107,14 @@ class AbsensiResource extends Resource
                         return request()->routeIs('filament.admin.resources.absensis.edit');
                     })
                     ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                    ->afterStateUpdated(function ($state, Set $set) {
                         $set('kelas_id', null);
                         $set('siswa_id', null);
                     }),
 
                 Select::make('kelas_id')
                     ->label('Kelas')
-                    ->options(function (Forms\Get $get) {
+                    ->options(function (Get $get) {
                         $periodeId = $get('periode_id');
                         $guruId = Auth::user()?->guru?->id;
 
@@ -115,7 +131,7 @@ class AbsensiResource extends Resource
 
                         return $kelasList;
                     })
-                    ->default(function (Forms\Get $get) {
+                    ->default(function (Get $get) {
                         $periodeId = $get('periode_id');
                         $guruId = Auth::user()?->guru?->id;
 
@@ -134,7 +150,7 @@ class AbsensiResource extends Resource
                     ->required()
                     ->placeholder('Pilih Kelas')
                     ->helperText('Pilih kelas untuk memfilter siswa yang tersedia')
-                    ->disabled(function (Forms\Get $get) {
+                    ->disabled(function (Get $get) {
                         $periodeId = $get('periode_id');
                         $guruId = Auth::user()?->guru?->id;
 
@@ -150,7 +166,7 @@ class AbsensiResource extends Resource
                         return $kelasCount === 0;
                     })
                     ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                    ->afterStateUpdated(function ($state, Set $set) {
                         $set('siswa_id', null);
                         if ($state) {
                             $set('tanggal', now()->format('Y-m-d'));
@@ -159,7 +175,7 @@ class AbsensiResource extends Resource
 
                 Select::make('siswa_id')
                     ->label('Siswa')
-                    ->options(function (Forms\Get $get) {
+                    ->options(function (Get $get) {
                         $kelasId = $get('kelas_id');
                         $periodeId = $get('periode_id');
 
@@ -169,13 +185,13 @@ class AbsensiResource extends Resource
                     })
                     ->searchable()
                     ->required()
-                    ->placeholder(function (Forms\Get $get) {
+                    ->placeholder(function (Get $get) {
                         if (!$get('periode_id')) return 'Pilih periode terlebih dahulu';
                         if (!$get('kelas_id')) return 'Pilih kelas terlebih dahulu';
                         return 'Pilih Siswa';
                     })
                     ->helperText('Siswa akan muncul setelah memilih periode dan kelas')
-                    ->disabled(function (Forms\Get $get) {
+                    ->disabled(function (Get $get) {
                         // Disable if requirements not met OR in edit mode
                         return empty($get('kelas_id')) ||
                             empty($get('periode_id')) ||
@@ -183,7 +199,7 @@ class AbsensiResource extends Resource
                     })
                     ->suffixIcon('heroicon-m-user')
                     ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                    ->afterStateUpdated(function ($state, Set $set) {
                         if ($state) {
                             $set('tanggal', now()->format('Y-m-d'));
                         }
@@ -211,8 +227,8 @@ class AbsensiResource extends Resource
 
                 Placeholder::make('validation_info')
                     ->label('Status Validasi')
-                    ->content(function (Forms\Get $get): string {
-                        if (request()->routeIs('filament.admin.resources.absensis.edit')) {
+                ->content(function (Get $get, ?Model $record): string {
+                    if ($record !== null) {
                             return "ℹ️ **Mode Edit:** Siswa dan tanggal tidak dapat diubah";
                         }
                         return self::getValidationStatus($get);
@@ -220,7 +236,7 @@ class AbsensiResource extends Resource
                     ->columnSpan(2),
             ])
             ->columns(3)
-            ->visible(fn(Forms\Get $get) => !empty($get('siswa_id')));
+            ->visible(fn(Get $get) => !empty($get('siswa_id')));
     }
 
     /**
@@ -233,18 +249,18 @@ class AbsensiResource extends Resource
             ->schema([
                 Placeholder::make('periode_info')
                     ->label('Informasi Periode')
-                    ->content(fn(Forms\Get $get): string => self::getPeriodeInfo($get('periode_id'))),
+                    ->content(fn(Get $get): string => self::getPeriodeInfo($get('periode_id'))),
 
                 Placeholder::make('kelas_info')
                     ->label('Informasi Kelas')
-                    ->content(fn(Forms\Get $get): string => self::getKelasInfo($get('kelas_id'))),
+                    ->content(fn(Get $get): string => self::getKelasInfo($get('kelas_id'))),
 
                 Placeholder::make('siswa_info')
                     ->label('Informasi Siswa')
-                    ->content(fn(Forms\Get $get): string => self::getSiswaInfo($get('siswa_id'))),
+                    ->content(fn(Get $get): string => self::getSiswaInfo($get('siswa_id'))),
             ])
             ->columns(3)
-            ->visible(fn(Forms\Get $get) => !empty($get('kelas_id')));
+            ->visible(fn(Get $get) => !empty($get('kelas_id')));
     }
 
     /**
@@ -262,7 +278,8 @@ class AbsensiResource extends Resource
                     ->placeholder('0')
                     ->helperText('Jumlah hari tidak hadir karena sakit')
                     ->rules(['integer', 'min:0', 'max:365'])
-                    ->live(onBlur: true),
+                    ->live(onBlur: true)
+                    ->dehydrated(),
 
                 TextInput::make('izin')
                     ->label('Izin (Hari)')
@@ -271,7 +288,8 @@ class AbsensiResource extends Resource
                     ->placeholder('0')
                     ->helperText('Jumlah hari tidak hadir dengan izin')
                     ->rules(['integer', 'min:0', 'max:365'])
-                    ->live(onBlur: true),
+                    ->live(onBlur: true)
+                    ->dehydrated(),
 
                 TextInput::make('tanpa_keterangan')
                     ->label('Tanpa Keterangan (Hari)')
@@ -283,11 +301,12 @@ class AbsensiResource extends Resource
                     ->placeholder('0')
                     ->helperText('Jumlah hari tidak hadir tanpa keterangan (Alpha)')
                     ->rules(['integer', 'min:0', 'max:365'])
-                    ->live(onBlur: true),
+                    ->live(onBlur: true)
+                    ->dehydrated(),
 
                 Placeholder::make('total_ketidakhadiran')
                     ->label('Total Ketidakhadiran')
-                    ->content(fn(Forms\Get $get): string => self::calculateTotalAbsence($get)),
+                    ->content(fn(Get $get): string => self::calculateTotalAbsence($get)),
             ])
             ->columns(4);
     }
@@ -305,7 +324,9 @@ class AbsensiResource extends Resource
                     ->rows(3)
                     ->placeholder('Masukkan catatan tambahan jika diperlukan')
                     ->helperText('Catatan khusus mengenai absensi siswa')
-                    ->maxLength(1000),
+                    ->maxLength(1000)
+                    ->disabled(fn(?Model $record): bool => $record !== null && $record->exists)
+                    ->dehydrated(fn(?Model $record): bool => $record === null || !$record->exists),
             ]);
     }
 
@@ -316,7 +337,7 @@ class AbsensiResource extends Resource
     {
         try {
             return Periode::where('is_active', true)->value('id');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to get active periode: ' . $e->getMessage());
             return null;
         }
@@ -337,7 +358,7 @@ class AbsensiResource extends Resource
                     return [$periode->id => $periode->tahun_ajaran . ' - ' . $periode->semester . $status];
                 })
                 ->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to load periode options: ' . $e->getMessage());
             return [];
         }
@@ -361,7 +382,7 @@ class AbsensiResource extends Resource
                     return $kelas ? "{$kelas->nama_kelas} ({$siswaCount} siswa)" : 'Kelas Tidak Ditemukan';
                 })
                 ->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to load kelas by periode options: ' . $e->getMessage());
             return [];
         }
@@ -390,7 +411,7 @@ class AbsensiResource extends Resource
                     return [$siswa->id => $siswa->nama_lengkap . $additionalInfo];
                 })
                 ->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to load siswa by kelas and periode: ' . $e->getMessage());
             return [];
         }
@@ -399,7 +420,7 @@ class AbsensiResource extends Resource
     /**
      * Get validation status for form
      */
-    private static function getValidationStatus(Forms\Get $get): string
+    private static function getValidationStatus(Get $get): string
     {
         $siswaId = $get('siswa_id');
         $tanggal = $get('tanggal');
@@ -429,7 +450,7 @@ class AbsensiResource extends Resource
             }
 
             return "✅ **Valid:** Data dapat disimpan";
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Validation check error: ' . $e->getMessage());
             return 'Error saat validasi';
         }
@@ -438,7 +459,7 @@ class AbsensiResource extends Resource
     /**
      * Validate unique absence record
      */
-    private static function validateUniqueAbsence(?int $siswaId, ?string $tanggal, ?int $periodeId, ?int $kelasId, ?int $recordId = null): bool|string
+    public static function validateUniqueAbsence(?int $siswaId, ?string $tanggal, ?int $periodeId, ?int $kelasId, ?int $recordId = null): bool|string
     {
         if (!$siswaId || !$periodeId || !$kelasId || !$tanggal) {
             return true;
@@ -460,7 +481,7 @@ class AbsensiResource extends Resource
             }
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Unique validation error: ' . $e->getMessage());
             return 'Error saat validasi duplikasi';
         }
@@ -488,7 +509,7 @@ class AbsensiResource extends Resource
                 $periode->semester,
                 $status
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error loading periode info: ' . $e->getMessage());
             return 'Error memuat informasi periode';
         }
@@ -504,18 +525,16 @@ class AbsensiResource extends Resource
         }
 
         try {
-            $kelas = Kelas::withCount('siswa')->find($kelasId);
+            $kelas = Kelas::find($kelasId);
             if (!$kelas) {
                 return 'Data kelas tidak ditemukan';
             }
 
-            return sprintf(
-                "**Nama Kelas:** %s\n**Total Siswa:** %d siswa\n**Tingkat:** %s",
-                $kelas->nama_kelas,
-                $kelas->siswa_count,
-                $kelas->tingkat ?? 'Tidak Ditentukan'
-            );
-        } catch (\Exception $e) {
+            $namaKelas = $kelas->nama_kelas;
+            $totalSiswa = $kelas->jumlah_siswa_aktif;
+
+            return "**Nama Kelas:** $namaKelas\n**Total Siswa:** $totalSiswa siswa";
+        } catch (Exception $e) {
             Log::error('Error loading kelas info: ' . $e->getMessage());
             return 'Error memuat informasi kelas';
         }
@@ -543,7 +562,7 @@ class AbsensiResource extends Resource
                 $siswa->nisn ?? '-',
                 $siswa->jenis_kelamin ?? '-'
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error loading siswa info: ' . $e->getMessage());
             return 'Error memuat informasi siswa';
         }
@@ -552,7 +571,7 @@ class AbsensiResource extends Resource
     /**
      * Calculate total absence with status
      */
-    private static function calculateTotalAbsence(Forms\Get $get): string
+    private static function calculateTotalAbsence(Get $get): string
     {
         $sakit = (int) ($get('sakit') ?? 0);
         $izin = (int) ($get('izin') ?? 0);
@@ -626,7 +645,7 @@ class AbsensiResource extends Resource
                         fn(?Model $record): string =>
                         !$record?->tanggal
                             ? ''
-                            : 'Bulan ' . \Carbon\Carbon::parse($record->tanggal)->format('F Y')
+                            : 'Bulan ' . Carbon::parse($record->tanggal)->format('F Y')
                     ),
 
                 TextColumn::make('sakit')
@@ -696,7 +715,7 @@ class AbsensiResource extends Resource
             ])
             ->defaultSort('tanggal', 'desc')
             ->filters([
-                Tables\Filters\SelectFilter::make('periode_id')
+                SelectFilter::make('periode_id')
                     ->label('Periode')
                     ->options(fn() => self::getPeriodeOptions())
                     // ->default(self::getActivePeriodeId())
@@ -710,9 +729,9 @@ class AbsensiResource extends Resource
                 //     ->preload()
                 //     ->placeholder('Semua Kelas'),
 
-                Tables\Filters\Filter::make('has_kelas')
+                Filter::make('has_kelas')
                     ->label('Hanya yang memiliki Kelas')
-                    ->form([
+                    ->schema([
                         Select::make('has_kelas')
                             ->options([
                                 'yes' => 'Ya',
@@ -730,14 +749,14 @@ class AbsensiResource extends Resource
                         return $query;
                     }),
 
-                Tables\Filters\SelectFilter::make('siswa_id')
+                SelectFilter::make('siswa_id')
                     ->label('Siswa')
                     ->relationship('siswa', 'nama_lengkap')
                     ->searchable()
                     ->placeholder('Semua Siswa'),
 
-                Tables\Filters\Filter::make('periode_tanggal')
-                    ->form([
+                Filter::make('periode_tanggal')
+                    ->schema([
                         DatePicker::make('dari_tanggal')
                             ->label('Dari Tanggal')
                             ->native(false),
@@ -760,17 +779,17 @@ class AbsensiResource extends Resource
                         $indicators = [];
 
                         if ($data['dari_tanggal'] ?? null) {
-                            $indicators[] = 'Dari: ' . \Carbon\Carbon::parse($data['dari_tanggal'])->format('d M Y');
+                            $indicators[] = 'Dari: ' . Carbon::parse($data['dari_tanggal'])->format('d M Y');
                         }
 
                         if ($data['sampai_tanggal'] ?? null) {
-                            $indicators[] = 'Sampai: ' . \Carbon\Carbon::parse($data['sampai_tanggal'])->format('d M Y');
+                            $indicators[] = 'Sampai: ' . Carbon::parse($data['sampai_tanggal'])->format('d M Y');
                         }
 
                         return $indicators;
                     }),
 
-                Tables\Filters\Filter::make('high_absence')
+                Filter::make('high_absence')
                     ->label('Absensi Tinggi (>10 hari)')
                     ->query(
                         fn(Builder $query): Builder =>
@@ -778,7 +797,7 @@ class AbsensiResource extends Resource
                     )
                     ->toggle(),
 
-                Tables\Filters\Filter::make('alpha_only')
+                Filter::make('alpha_only')
                     ->label('Ada Alpha')
                     ->query(
                         fn(Builder $query): Builder =>
@@ -786,7 +805,7 @@ class AbsensiResource extends Resource
                     )
                     ->toggle(),
 
-                Tables\Filters\TernaryFilter::make('periode_status')
+                TernaryFilter::make('periode_status')
                     ->label('Status Periode')
                     ->placeholder('Semua periode')
                     ->trueLabel('Periode Aktif')
@@ -797,24 +816,24 @@ class AbsensiResource extends Resource
                         blank: fn(Builder $query) => $query,
                     ),
             ])
-            ->actions([
+            ->recordActions([
             ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])->label('Aksi')
                 ->icon('heroicon-m-bars-3-center-left')
                 ->size('sm')
                 ->color('gray')
                 ->button(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make(),
+                CreateAction::make(),
             ])
             ->striped();
     }
@@ -841,9 +860,9 @@ class AbsensiResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAbsensis::route('/'),
-            'create' => Pages\CreateAbsensi::route('/create'),
-            'edit' => Pages\EditAbsensi::route('/{record}/edit'),
+            'index' => ListAbsensis::route('/'),
+            'create' => CreateAbsensi::route('/create'),
+            'edit' => EditAbsensi::route('/{record}/edit'),
         ];
     }
 
@@ -852,7 +871,7 @@ class AbsensiResource extends Resource
         try {
             $count = static::getModel()::count();
             return $count > 0 ? (string) $count : null;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to get navigation badge: ' . $e->getMessage());
             return null;
         }

@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Filament\Resources\KelasSiswaResource\Pages;
+namespace App\Filament\Resources\KelasSiswas\Pages;
 
+use Illuminate\Database\Eloquent\Model;
 use App\Models\KelasSiswa;
 use Illuminate\Support\Facades\Log;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
-use App\Filament\Resources\KelasSiswaResource;
+use App\Filament\Resources\KelasSiswas\KelasSiswaResource;
 
 class CreateKelasSiswa extends CreateRecord
 {
@@ -37,7 +38,7 @@ class CreateKelasSiswa extends CreateRecord
         return $data;
     }
 
-    protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
+    protected function handleRecordCreation(array $data): Model
     {
         // Handle multiple students
         if (!empty($data['siswa_ids']) && is_array($data['siswa_ids'])) {

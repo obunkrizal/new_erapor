@@ -2,6 +2,8 @@
 
 namespace App\Imports;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\Siswa;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -20,7 +22,7 @@ class SiswaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFai
     /**
      * @param array $row
      *
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @return Model|null
      */
     public function model(array $row)
     {
@@ -31,7 +33,7 @@ class SiswaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFai
                 'nisn' => $row['nisn'] ?? null,
                 'nama_lengkap' => $row['nama_lengkap'] ?? null,
                 'tempat_lahir' => $row['tempat_lahir'] ?? null,
-                'tanggal_lahir' => isset($row['tanggal_lahir']) ? \Carbon\Carbon::parse($row['tanggal_lahir']) : null,
+                'tanggal_lahir' => isset($row['tanggal_lahir']) ? Carbon::parse($row['tanggal_lahir']) : null,
                 'jenis_kelamin' => $row['jenis_kelamin'] ?? null,
                 'agama' => $row['agama'] ?? null,
                 'nama_ayah' => $row['nama_ayah'] ?? null,

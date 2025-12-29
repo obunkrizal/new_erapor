@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\DataMedisSiswaResource\Pages;
+namespace App\Filament\Resources\DataMedisSiswas\Pages;
 
-use App\Filament\Resources\DataMedisSiswaResource;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\DataMedisSiswas\DataMedisSiswaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -13,7 +14,7 @@ class EditDataMedisSiswa extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
     protected function getRedirectUrl(): string

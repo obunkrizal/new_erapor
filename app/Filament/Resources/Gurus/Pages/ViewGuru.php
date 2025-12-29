@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\GuruResource\Pages;
+namespace App\Filament\Resources\Gurus\Pages;
 
-use App\Filament\Resources\GuruResource;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\Gurus\GuruResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Auth;
@@ -14,10 +16,10 @@ class ViewGuru extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make()
+            EditAction::make()
                 ->visible(fn() => Auth::user()?->isAdmin()),
 
-            Actions\DeleteAction::make()
+            DeleteAction::make()
                 ->visible(fn() => Auth::user()?->isAdmin()),
         ];
     }

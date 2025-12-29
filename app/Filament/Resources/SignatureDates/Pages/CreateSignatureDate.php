@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\SignatureDateResource\Pages;
+namespace App\Filament\Resources\SignatureDates\Pages;
 
-use App\Filament\Resources\SignatureDateResource;
+use App\Filament\Resources\SignatureDates\SignatureDateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 

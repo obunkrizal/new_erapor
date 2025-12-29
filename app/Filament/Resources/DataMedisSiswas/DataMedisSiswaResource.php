@@ -1,14 +1,31 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\DataMedisSiswas;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Utilities\Get;
+use Exception;
+use Carbon\Carbon;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\DataMedisSiswas\Pages\ListDataMedisSiswas;
+use App\Filament\Resources\DataMedisSiswas\Pages\CreateDataMedisSiswa;
+use App\Filament\Resources\DataMedisSiswas\Pages\EditDataMedisSiswa;
 use Closure;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\Periode;
-use Filament\Forms\Form;
 use App\Models\KelasSiswa;
 use Filament\Tables\Table;
 use App\Models\DataMedisSiswa;
@@ -17,12 +34,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
@@ -32,7 +47,7 @@ class DataMedisSiswaResource extends Resource
 {
     protected static ?string $model = DataMedisSiswa::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-heart';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-heart';
 
     protected static ?string $navigationLabel = 'Manajemen Medis Siswa';
 
@@ -40,7 +55,7 @@ class DataMedisSiswaResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Manajemen Medis Siswa';
 
-    protected static ?string $navigationGroup = 'Data Master';
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Master';
 
     protected static ?int $navigationSort = 4;
 
@@ -56,10 +71,10 @@ class DataMedisSiswaResource extends Resource
         return Auth::user()?->isGuru() ?? false;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 self::createPeriodeKelasSection(),
                 self::createInformasiDasarSection(),
                 self::createDetailFisikSection(),
@@ -88,14 +103,14 @@ class DataMedisSiswaResource extends Resource
                         return $record !== null;
                     })
                     ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                    ->afterStateUpdated(function ($state, Set $set) {
                         $set('kelas_id', null);
                         $set('siswa_id', null);
                     }),
 
             Select::make('kelas_id')
                 ->label('Kelas')
-                ->options(function (Forms\Get $get) {
+                ->options(function (Get $get) {
                     $periodeId = $get('periode_id');
                     $guruId = Auth::user()?->guru?->id;
 
@@ -112,7 +127,7 @@ class DataMedisSiswaResource extends Resource
 
                     return $kelasList;
                 })
-                ->default(function (Forms\Get $get) {
+                ->default(function (Get $get) {
                     $periodeId = $get('periode_id');
                     $guruId = Auth::user()?->guru?->id;
 
@@ -131,7 +146,7 @@ class DataMedisSiswaResource extends Resource
                 ->required()
                 ->placeholder('Pilih Kelas')
                 ->helperText('Pilih kelas untuk memfilter siswa yang tersedia')
-                ->disabled(function (Forms\Get $get) {
+                ->disabled(function (Get $get) {
                     $periodeId = $get('periode_id');
                     $guruId = Auth::user()?->guru?->id;
 
@@ -147,7 +162,7 @@ class DataMedisSiswaResource extends Resource
                     return $kelasCount === 0;
                 })
                 ->live()
-                ->afterStateUpdated(function ($state, Forms\Set $set) {
+                ->afterStateUpdated(function ($state, Set $set) {
                     $set('siswa_id', null);
                     if ($state) {
                         $set('tanggal', now()->format('Y-m-d'));
@@ -157,7 +172,7 @@ class DataMedisSiswaResource extends Resource
 
             Select::make('siswa_id')
                     ->label('Siswa')
-                    ->options(function (Forms\Get $get, ?Model $record) {
+                    ->options(function (Get $get, ?Model $record) {
                         $kelasId = $get('kelas_id') ?? $record?->kelas_id;
                         $periodeId = $get('periode_id') ?? $record?->periode_id;
 
@@ -167,14 +182,14 @@ class DataMedisSiswaResource extends Resource
                     })
                     ->searchable()
                     ->required()
-                    ->placeholder(function (Forms\Get $get, ?Model $record) {
+                    ->placeholder(function (Get $get, ?Model $record) {
                         if ($record) return 'Siswa tidak dapat diubah';
                         if (!$get('periode_id')) return 'Pilih periode terlebih dahulu';
                         if (!$get('kelas_id')) return 'Pilih kelas terlebih dahulu';
                         return 'Pilih Siswa';
                     })
                     ->helperText('Siswa akan muncul setelah memilih periode dan kelas')
-                    ->disabled(function (Forms\Get $get, ?Model $record) {
+                    ->disabled(function (Get $get, ?Model $record) {
                         // Disable if requirements not met OR in edit mode
                         return $record !== null ||
                             empty($get('kelas_id')) ||
@@ -182,7 +197,7 @@ class DataMedisSiswaResource extends Resource
                     })
                     ->suffixIcon('heroicon-m-user')
                     ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                    ->afterStateUpdated(function ($state, Set $set) {
                         if ($state) {
                             $set('tanggal_pemeriksaan', now()->format('Y-m-d'));
                         }
@@ -214,7 +229,7 @@ class DataMedisSiswaResource extends Resource
 
                 Placeholder::make('validation_info')
                     ->label('Status Validasi')
-                    ->content(function (Forms\Get $get, ?Model $record): string {
+                    ->content(function (Get $get, ?Model $record): string {
                         if ($record !== null) {
                             return "ℹ️ **Mode Edit:** Siswa dan tanggal tidak dapat diubah";
                         }
@@ -223,7 +238,7 @@ class DataMedisSiswaResource extends Resource
                     ->columnSpan(2),
             ])
             ->columns(3)
-            ->visible(fn(Forms\Get $get, ?Model $record) => !empty($get('siswa_id')) || $record !== null);
+            ->visible(fn(Get $get, ?Model $record) => !empty($get('siswa_id')) || $record !== null);
     }
     /**
      * Create detail fisik section
@@ -267,7 +282,7 @@ class DataMedisSiswaResource extends Resource
 
                 Placeholder::make('bmi_info')
                     ->label('Indeks Massa Tubuh (BMI)')
-                    ->content(function (Forms\Get $get): string {
+                    ->content(function (Get $get): string {
                         return self::calculateBMI($get);
                     }),
             ])->columns(4);
@@ -306,7 +321,7 @@ class DataMedisSiswaResource extends Resource
     {
         try {
             return Periode::where('is_active', true)->value('id');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to get active periode: ' . $e->getMessage());
             return null;
         }
@@ -327,7 +342,7 @@ class DataMedisSiswaResource extends Resource
                     return [$periode->id => $periode->tahun_ajaran . ' - ' . $periode->semester . $status];
                 })
                 ->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to load periode options: ' . $e->getMessage());
             return [];
         }
@@ -351,7 +366,7 @@ class DataMedisSiswaResource extends Resource
                     return $kelas ? "{$kelas->nama_kelas} ({$siswaCount} siswa)" : 'Kelas Tidak Ditemukan';
                 })
                 ->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to load kelas by periode options: ' . $e->getMessage());
             return [];
         }
@@ -376,7 +391,7 @@ class DataMedisSiswaResource extends Resource
                     if ($siswa->nis) $info[] = "NIS: {$siswa->nis}";
                     if ($siswa->jenis_kelamin) $info[] = $siswa->jenis_kelamin;
                     if ($siswa->tanggal_lahir) {
-                        $age = \Carbon\Carbon::parse($siswa->tanggal_lahir)->age;
+                        $age = Carbon::parse($siswa->tanggal_lahir)->age;
                         $info[] = "{$age} tahun";
                     }
 
@@ -384,7 +399,7 @@ class DataMedisSiswaResource extends Resource
                     return [$siswa->id => $siswa->nama_lengkap . $additionalInfo];
                 })
                 ->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to load siswa by kelas and periode: ' . $e->getMessage());
             return [];
         }
@@ -393,7 +408,7 @@ class DataMedisSiswaResource extends Resource
     /**
      * Get validation status for form
      */
-    private static function getValidationStatus(Forms\Get $get, ?Model $record = null): string
+    private static function getValidationStatus(Get $get, ?Model $record = null): string
     {
         $siswaId = $get('siswa_id');
         $tanggalPemeriksaan = $get('tanggal_pemeriksaan');
@@ -422,7 +437,7 @@ class DataMedisSiswaResource extends Resource
             }
 
             return "✅ **Valid:** Data dapat disimpan";
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Validation check error: ' . $e->getMessage());
             return 'Error saat validasi';
         }
@@ -430,7 +445,7 @@ class DataMedisSiswaResource extends Resource
     /**
      * Validate unique medical record
      */
-    private static function validateUniqueMedicalRecord(Forms\Get $get, ?Model $record = null): bool|string
+    private static function validateUniqueMedicalRecord(Get $get, ?Model $record = null): bool|string
     {
         $siswaId = $get('siswa_id');
         $periodeId = $get('periode_id');
@@ -457,7 +472,7 @@ class DataMedisSiswaResource extends Resource
             }
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Unique validation error: ' . $e->getMessage());
             return 'Error saat validasi duplikasi';
         }
@@ -466,7 +481,7 @@ class DataMedisSiswaResource extends Resource
     /**
      * Calculate BMI
      */
-    private static function calculateBMI(Forms\Get $get): string
+    private static function calculateBMI(Get $get): string
     {
         $tinggi = (float) ($get('tinggi_badan') ?? 0);
         $berat = (float) ($get('berat_badan') ?? 0);
@@ -565,7 +580,7 @@ class DataMedisSiswaResource extends Resource
                     ->sortable()
                     ->description(function (?Model $record): string {
                         if (!$record?->tanggal_pemeriksaan) return '';
-                        return 'Bulan ' . \Carbon\Carbon::parse($record->tanggal_pemeriksaan)->format('F Y');
+                        return 'Bulan ' . Carbon::parse($record->tanggal_pemeriksaan)->format('F Y');
                     }),
 
                 TextColumn::make('tinggi_badan')
@@ -654,26 +669,26 @@ class DataMedisSiswaResource extends Resource
             ])
             ->defaultSort('tanggal_pemeriksaan', 'desc')
             ->filters([
-                Tables\Filters\SelectFilter::make('periode_id')
+                SelectFilter::make('periode_id')
                     ->label('Periode')
                     ->options(fn() => self::getPeriodeOptions())
                     ->default(self::getActivePeriodeId())
                     ->placeholder('Semua Periode'),
 
-                Tables\Filters\SelectFilter::make('kelas_id')
+                SelectFilter::make('kelas_id')
                     ->label('Kelas')
                     ->relationship('kelas', 'nama_kelas')
                     ->searchable()
                     ->preload()
                     ->placeholder('Semua Kelas'),
 
-                Tables\Filters\SelectFilter::make('golongan_darah')
+                SelectFilter::make('golongan_darah')
                     ->label('Golongan Darah')
                     ->options(self::getGolonganDarahOptions())
                     ->placeholder('Semua Golongan Darah'),
 
-                Tables\Filters\Filter::make('tanggal_pemeriksaan')
-                    ->form([
+                Filter::make('tanggal_pemeriksaan')
+                    ->schema([
                         DatePicker::make('dari_tanggal')
                             ->label('Dari Tanggal')
                             ->native(false),
@@ -696,18 +711,18 @@ class DataMedisSiswaResource extends Resource
                         $indicators = [];
 
                         if ($data['dari_tanggal'] ?? null) {
-                            $indicators[] = 'Dari: ' . \Carbon\Carbon::parse($data['dari_tanggal'])->format('d M Y');
+                            $indicators[] = 'Dari: ' . Carbon::parse($data['dari_tanggal'])->format('d M Y');
                         }
 
                         if ($data['sampai_tanggal'] ?? null) {
-                            $indicators[] = 'Sampai: ' . \Carbon\Carbon::parse($data['sampai_tanggal'])->format('d M Y');
+                            $indicators[] = 'Sampai: ' . Carbon::parse($data['sampai_tanggal'])->format('d M Y');
                         }
 
                         return $indicators;
                     }),
 
-                Tables\Filters\Filter::make('bmi_status')
-                    ->form([
+                Filter::make('bmi_status')
+                    ->schema([
                         Select::make('bmi_category')
                             ->label('Kategori BMI')
                             ->options([
@@ -738,24 +753,24 @@ class DataMedisSiswaResource extends Resource
                         );
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
                 ])->label('Aksi')
                 ->icon('heroicon-m-bars-3-center-left')
                 ->size('sm')
                 ->color('gray')
                 ->button(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make(),
+                CreateAction::make(),
             ])
             ->striped();
     }
@@ -768,9 +783,9 @@ class DataMedisSiswaResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDataMedisSiswas::route('/'),
-            'create' => Pages\CreateDataMedisSiswa::route('/create'),
-            'edit' => Pages\EditDataMedisSiswa::route('/{record}/edit'),
+            'index' => ListDataMedisSiswas::route('/'),
+            'create' => CreateDataMedisSiswa::route('/create'),
+            'edit' => EditDataMedisSiswa::route('/{record}/edit'),
         ];
     }
 
@@ -779,7 +794,7 @@ class DataMedisSiswaResource extends Resource
         try {
             $count = static::getModel()::count();
             return $count > 0 ? (string) $count : null;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to get navigation badge: ' . $e->getMessage());
             return null;
         }

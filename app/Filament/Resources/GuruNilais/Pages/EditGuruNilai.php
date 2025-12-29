@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\GuruNilaiResource\Pages;
+namespace App\Filament\Resources\GuruNilais\Pages;
 
-use App\Filament\Resources\GuruNilaiResource;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\GuruNilais\GuruNilaiResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
@@ -29,16 +31,16 @@ class EditGuruNilai extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('view_report')
+            Action::make('view_report')
                 ->label('Lihat Rapor')
                 ->icon('heroicon-o-document-text')
                 ->color('info')
                 ->url(fn (): string => route('nilai.print', ['nilai' => $this->record]))
                 ->openUrlInNewTab(),
 
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
 
-            Actions\Action::make('back')
+            Action::make('back')
                 ->label('Kembali')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')

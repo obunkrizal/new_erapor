@@ -57,9 +57,9 @@
                 const ampm = hour < 12 ? "AM" : "PM";
 
                 // get date components
+                const day = today.getDate();
                 const month = today.getMonth();
                 const year = today.getFullYear();
-                const day = today.getDate();
 
                 //declaring a list of all months in  a year
                 const monthList = [
@@ -78,8 +78,8 @@
                 ];
 
                 //get current date and time
-                const date = monthList[month] + " " + day + ", " + year;
-                const time = hourTime + ":" + minute + ":" + second + ampm;
+                const date = day +   " "+monthList[month] + " "  + year;
+                const time = hourTime + ":" + minute + ":" + second + " "+ampm;
 
                 //combine current date and time
                 const dateTime = date + " - " + time;
@@ -103,30 +103,30 @@
         body-clock {
             text-align: center;
             font-family: "Oswald", sans-serif;
-            font-weight: 200;
-            font-size: 20pt;
+            font-weight: 50;
+            font-size: 12pt;
             display: flex;
             justify-content: center;
             align-items: center;
             background-color: #faedcd;
-            height: 100vh;
+            height: 50vh;
         }
 
         #clock {
-            max-width: 600px;
+            max-width: 1000px;
         }
 
         /* for smaller screens below 700px */
         @media only screen and (max-width: 700px) {
             body {
-                font-size: 20pt;
+                font-size: 12pt;
             }
         }
 
         /*for smaller screens below 300px*/
         @media only screen and (max-width: 300px) {
             body {
-                font-size: 20pt;
+                font-size: 12pt;
             }
         }
 
@@ -516,7 +516,7 @@
         </div>
     @endif
 
-    <header id="header" style="margin-bottom: 1px" class="header d-flex align-items-center fixed-top">
+    <header style="margin-bottom: 0px" class="header d-flex align-items-center fixed-top">
         <div class="container-fluid container-xl position-relative d-flex align-items-center">
             <nav id="navmenu" class="navmenu">
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
@@ -528,13 +528,13 @@
         <!-- Add this to your HTML body -->
         <section id="hero" class="hero section">
             <!-- Hero Section -->
-            <div class="hero-bg">
+            {{-- <div class="hero-bg">
                 <img src="{{ asset('assets/img/hero-bg.png') }}" alt="">
-            </div>
+            </div> --}}
             <div class="container text-center">
                 <div class="d-flex flex-column justify-content-center align-items-center">
-                    <div id="clock" style="margin-bottom: 10px">
-                        <h1 id="date-time"></h1>
+                    <div id="clock" style="margin-bottom: 5px">
+                        <h2 id="date-time"></h2>
                     </div>
                     <h1 data-aos="fade-up">Welcome to <span>{{ ucwords($sekolah->nama_sekolah) }}</span></h1>
                     <p data-aos="fade-up" data-aos-delay="100">Sistem Informasi Akademik
@@ -542,12 +542,13 @@
                     <div class="d-flex" data-aos="fade-up" data-aos-delay="200">
                         <a href="{{ route('filament.admin.auth.login') }}" class="btn-get-started">Login</a>
                     </div>
-                    <img src="{{ asset('assets/img/hero-services-img.webp') }}" class="img-fluid hero-img"
+                    <img src="{{ asset('assets/img/hero-services-img.webp') }}" class="max-w-2xl img-fluid hero-img"
                         alt="" data-aos="zoom-out" data-aos-delay="300">
+
                 </div>
                 <div class="mb-0 credits">
-                    <p style="font-size: 12pt">© <span>Copyright</span> <strong class="px-1 sitename">ObunKRizal</strong><span>All Rights
-                            Reserved</span></p>
+                    <p style="font-size: 12pt">© <span>Copyright</span> 2024-{{date('Y')}} <strong
+                            class="px-1 sitename">ObunKRizal</strong></p>
                     <div class="mt-1 credits">
                         Designed by <a href="#">BootstrapMade</a>
                     </div>

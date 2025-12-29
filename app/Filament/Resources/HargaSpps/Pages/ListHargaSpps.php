@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\HargaSppResource\Pages;
+namespace App\Filament\Resources\HargaSpps\Pages;
 
-use App\Filament\Resources\HargaSppResource;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\HargaSpps\HargaSppResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -13,7 +14,7 @@ class ListHargaSpps extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

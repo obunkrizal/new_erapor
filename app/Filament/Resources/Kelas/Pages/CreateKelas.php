@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\KelasResource\Pages;
+namespace App\Filament\Resources\Kelas\Pages;
 
-use App\Filament\Resources\KelasResource;
+use App\Filament\Resources\Kelas\KelasResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateKelas extends CreateRecord

@@ -1,29 +1,42 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\GuruKelas;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Placeholder;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Actions\BulkActionGroup;
+use App\Filament\Resources\GuruKelas\Pages\ListGuruKelas;
+use Exception;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Kelas;
 use App\Models\Periode;
-use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
-use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\GuruKelasResource\Pages;
 
 class GuruKelasResource extends Resource
 {
     protected static ?string $model = Kelas::class;
-    protected static ?string $navigationIcon = 'heroicon-o-building-library';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-building-library';
     protected static ?string $navigationLabel = 'Kelas Saya';
     protected static ?string $modelLabel = 'Kelas';
     protected static ?string $pluralModelLabel = 'Kelas Saya';
-    protected static ?string $navigationGroup = 'Guru';
+    protected static string | \UnitEnum | null $navigationGroup = 'Guru';
     protected static ?int $navigationSort = 1;
 
     public static function shouldRegisterNavigation(): bool
@@ -57,45 +70,45 @@ class GuruKelasResource extends Resource
                     ]);
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Informasi Kelas')
+        return $schema
+            ->components([
+                Section::make('Informasi Kelas')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('nama_kelas')
+                                TextInput::make('nama_kelas')
                                     ->label('Nama Kelas')
                                     ->disabled(),
 
-                                Forms\Components\TextInput::make('guru.nama_guru')
+                                TextInput::make('guru.nama_guru')
                                     ->label('Wali Kelas')
                                     ->disabled(),
 
-                                Forms\Components\TextInput::make('periode.nama_periode')
+                                TextInput::make('periode.nama_periode')
                                     ->label('Periode')
                                     ->disabled(),
 
-                                Forms\Components\TextInput::make('status')
+                                TextInput::make('status')
                                     ->label('Status')
                                     ->disabled(),
                             ]),
                     ]),
 
-                Forms\Components\Section::make('Statistik Siswa')
+                Section::make('Statistik Siswa')
                     ->schema([
-                        Forms\Components\Grid::make(3)
+                        Grid::make(3)
                             ->schema([
-                                Forms\Components\Placeholder::make('total_siswa')
+                                Placeholder::make('total_siswa')
                                     ->label('Total Siswa')
                                     ->content(fn(?Kelas $record) => self::getActiveStudentCount($record)),
 
-                                Forms\Components\Placeholder::make('gender_distribution')
+                                Placeholder::make('gender_distribution')
                                     ->label('Distribusi Gender')
                                     ->content(fn(?Kelas $record) => self::getGenderDistribution($record)),
 
-                                Forms\Components\Placeholder::make('kapasitas')
+                                Placeholder::make('kapasitas')
                                     ->label('Kapasitas Kelas')
                                     ->content(fn(?Kelas $record) => $record?->kapasitas ? "{$record->kapasitas} siswa" : 'Tidak ditentukan'),
                             ]),
@@ -111,7 +124,7 @@ class GuruKelasResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nama_kelas')
+                TextColumn::make('nama_kelas')
                     ->label('Nama Kelas')
                     ->searchable()
                     ->sortable()
@@ -120,7 +133,7 @@ class GuruKelasResource extends Resource
                     ->color('primary')
                     ->icon('heroicon-o-academic-cap'),
 
-                Tables\Columns\TextColumn::make('periode.nama_periode')
+                TextColumn::make('periode.nama_periode')
                     ->label('Periode')
                     ->badge()
                     ->color('success')
@@ -129,7 +142,7 @@ class GuruKelasResource extends Resource
                     )
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('siswa_aktif_count')
+                TextColumn::make('siswa_aktif_count')
                     ->label('Jumlah Siswa')
                     ->badge()
                     ->color('info')
@@ -137,14 +150,14 @@ class GuruKelasResource extends Resource
                     ->sortable()
                     ->alignCenter(),
 
-                Tables\Columns\TextColumn::make('kapasitas')
+                TextColumn::make('kapasitas')
                     ->label('Kapasitas')
                     ->formatStateUsing(fn($state) => $state ? "{$state} siswa" : 'Tidak ditentukan')
                     ->color('warning')
                     ->alignCenter()
                     ->placeholder('Tidak ditentukan'),
 
-                Tables\Columns\TextColumn::make('utilization')
+                TextColumn::make('utilization')
                     ->label('Utilisasi')
                     ->state(function (Kelas $record): string {
                         $siswaCount = $record->siswa_aktif_count ?? 0;
@@ -173,7 +186,7 @@ class GuruKelasResource extends Resource
                     })
                     ->alignCenter(),
 
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->label('Status')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -185,12 +198,12 @@ class GuruKelasResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('periode_id')
+                SelectFilter::make('periode_id')
                     ->label('Periode')
                     ->relationship('periode', 'nama_periode')
                     ->default(fn() => Periode::where('is_active', true)->value('id')),
 
-                Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->label('Status Kelas')
                     ->options([
                         'aktif' => 'Aktif',
@@ -198,18 +211,18 @@ class GuruKelasResource extends Resource
                         'selesai' => 'Selesai',
                     ]),
 
-                Tables\Filters\Filter::make('kapasitas_penuh')
+                Filter::make('kapasitas_penuh')
                     ->label('Kapasitas Penuh')
                     ->query(fn (Builder $query): Builder =>
                         $query->whereRaw('(SELECT COUNT(*) FROM kelas_siswas WHERE kelas_id = kelas.id AND status = "aktif") >= kapasitas')
                     )
                     ->toggle(),
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
+                ViewAction::make(),
 
-                Tables\Actions\Action::make('manage_students')
+                Action::make('manage_students')
                     ->label('Kelola Siswa')
                     ->icon('heroicon-o-users')
                     ->color('info')
@@ -220,7 +233,7 @@ class GuruKelasResource extends Resource
                         ])
                     ),
 
-                Tables\Actions\Action::make('create_assessment')
+                Action::make('create_assessment')
                     ->label('Buat Penilaian')
                     ->icon('heroicon-o-clipboard-document-check')
                     ->color('success')
@@ -232,13 +245,13 @@ class GuruKelasResource extends Resource
                         ])
                     ),
 
-                Tables\Actions\Action::make('class_report')
+                Action::make('class_report')
                     ->label('Laporan Kelas')
                     ->icon('heroicon-o-document-chart-bar')
                     ->color('warning')
                     ->action(function (Kelas $record) {
                         // You can implement class report generation here
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Laporan Kelas')
                             ->body("Generating report for {$record->nama_kelas}")
                             ->info()
@@ -250,8 +263,8 @@ class GuruKelasResource extends Resource
                 ->color('gray')
                 ->button(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     // Add bulk actions if needed
                 ]),
             ])
@@ -262,7 +275,7 @@ class GuruKelasResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListGuruKelas::route('/'),
+            'index' => ListGuruKelas::route('/'),
         ];
     }
 
@@ -273,7 +286,7 @@ class GuruKelasResource extends Resource
         try {
             $count = $record->kelasSiswa()->where('status', 'aktif')->count();
             return "{$count} siswa aktif";
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error getting student count', [
                 'kelas_id' => $record->id,
                 'error' => $e->getMessage()
@@ -300,7 +313,7 @@ class GuruKelasResource extends Resource
             $perempuan = $stats['perempuan'] ?? $stats['p'] ?? 0;
 
             return "Laki-laki: {$laki} | Perempuan: {$perempuan}";
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error getting gender distribution', [
                 'kelas_id' => $record->id,
                 'error' => $e->getMessage()

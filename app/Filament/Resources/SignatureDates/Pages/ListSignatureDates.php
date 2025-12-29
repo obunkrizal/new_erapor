@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\SignatureDateResource\Pages;
+namespace App\Filament\Resources\SignatureDates\Pages;
 
-use App\Filament\Resources\SignatureDateResource;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\SignatureDates\SignatureDateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -13,7 +14,7 @@ class ListSignatureDates extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

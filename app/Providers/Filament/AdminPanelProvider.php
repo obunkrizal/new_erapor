@@ -2,6 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
+use Filament\Widgets\AccountWidget;
+use App\Http\Middleware\CheckUserActive;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
@@ -13,9 +16,8 @@ use App\Filament\Widgets\GuruSummaryWidget;
 use App\Filament\Widgets\NilaiStatsWidget;
 use App\Filament\Widgets\SiswaStatsWidget;
 use Filament\Http\Middleware\Authenticate;
-use CWSPS154\AppSettings\AppSettingsPlugin;
-use App\Filament\Resources\GuruKelasResource;
-use App\Filament\Resources\GuruNilaiResource;
+use App\Filament\Resources\GuruKelas\GuruKelasResource;
+use App\Filament\Resources\GuruNilais\GuruNilaiResource;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -47,11 +49,11 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+            Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
+            AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
                 // QuickActionsWidget::class,
                 // PeriodeOverviewWidget::class,
@@ -69,7 +71,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                \App\Http\Middleware\CheckUserActive::class,
+            CheckUserActive::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
@@ -80,21 +82,6 @@ class AdminPanelProvider extends PanelProvider
                 GuruKelasResource::class,
                 GuruNilaiResource::class,
             ])
-            ->plugins([
-                AppSettingsPlugin::make()
-                    ->canAccess(function () {
-                        // Temporarily allow access to all logged-in users for testing
-                        return true;
-                        // To restrict to admin, use:
-                        // return Auth::check() && Auth::user()->role === 'admin';
-                    })
-                    ->canAccessAppSectionTab(function () {
-                        // Temporarily allow access to all logged-in users for testing
-                        return true;
-                        // To restrict to admin, use:
-                        // return Auth::check() && Auth::user()->role === 'admin';
-                    })
-                    ->appAdditionalField([])
-            ]);
+            ->plugins([]);
     }
 }

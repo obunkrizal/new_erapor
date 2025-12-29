@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\GuruSiswaKelasResource\Pages;
+namespace App\Filament\Resources\GuruSiswaKelas\Pages;
 
-use App\Filament\Resources\GuruSiswaKelasResource;
+use App\Filament\Resources\GuruSiswaKelas\GuruSiswaKelasResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 

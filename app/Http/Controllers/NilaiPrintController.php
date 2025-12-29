@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Absensi;
+use Exception;
 use App\Models\Nilai;
 use App\Models\Sekolah;
 use Illuminate\Http\Request;
@@ -96,7 +98,7 @@ class NilaiPrintController extends Controller
         }
 
         // Check if signature date exists
-        $signatureDateExists = \App\Models\SignatureDate::exists();
+        $signatureDateExists = SignatureDate::exists();
         if (!$signatureDateExists) {
             Notification::make()
                 ->title('Printing Tidak di Izinkan')
@@ -190,7 +192,7 @@ class NilaiPrintController extends Controller
     private function getAttendanceData(Nilai $nilai)
     {
         try {
-            $absensiData = \App\Models\Absensi::where('siswa_id', $nilai->siswa_id)
+            $absensiData = Absensi::where('siswa_id', $nilai->siswa_id)
                 ->where('periode_id', $nilai->periode_id)
                 ->selectRaw('SUM(sakit) as sakit, SUM(izin) as izin, SUM(tanpa_keterangan) as tanpa_keterangan')
                 ->first();
@@ -200,7 +202,7 @@ class NilaiPrintController extends Controller
                 'izin' => $absensiData->izin ?? 0,
                 'tanpa_keterangan' => $absensiData->tanpa_keterangan ?? 0,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return (object) [
                 'sakit' => 0,
                 'izin' => 0,

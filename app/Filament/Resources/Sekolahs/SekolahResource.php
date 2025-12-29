@@ -1,13 +1,30 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\Sekolahs;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Forms\Components\Placeholder;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\Sekolahs\Pages\ListSekolahs;
+use App\Filament\Resources\Sekolahs\Pages\CreateSekolah;
+use App\Filament\Resources\Sekolahs\Pages\EditSekolah;
 use App\Filament\Resources\SekolahResource\Pages;
 use App\Filament\Resources\SekolahResource\RelationManagers;
 use App\Models\Sekolah;
 use App\Models\Guru;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -25,7 +42,7 @@ class SekolahResource extends Resource
 
     protected static ?string $model = Sekolah::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-building-office-2';
 
     protected static ?string $navigationLabel = 'Manajemen Sekolah';
 
@@ -34,7 +51,7 @@ class SekolahResource extends Resource
     protected static ?string $pluralModelLabel = 'Manajemen Sekolah';
 
 
-    protected static ?string $navigationGroup = 'Data Master';
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Master';
 
     protected static ?int $navigationSort = 1;
 
@@ -52,17 +69,17 @@ class SekolahResource extends Resource
         return Auth::user()?->isAdmin() ?? false;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Informasi Dasar Sekolah')
+        return $schema
+            ->components([
+                Section::make('Informasi Dasar Sekolah')
                     ->description('Data identitas dan informasi dasar sekolah')
                     ->icon('heroicon-o-building-office-2')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('nama_sekolah')
+                                TextInput::make('nama_sekolah')
                                     ->label('Nama Sekolah')
                                     ->required()
                                     ->maxLength(255)
@@ -70,7 +87,7 @@ class SekolahResource extends Resource
                                     ->prefixIcon('heroicon-m-building-office-2')
                                     ->columnSpanFull(),
 
-                                Forms\Components\TextInput::make('npsn')
+                                TextInput::make('npsn')
                                     ->label('NPSN (Nomor Pokok Sekolah Nasional)')
                                     ->required()
                                     ->maxLength(8)
@@ -81,7 +98,7 @@ class SekolahResource extends Resource
                                     ->helperText('8 digit nomor unik sekolah')
                                     ->rules(['digits:8']),
 
-                                Forms\Components\Select::make('akreditasi')
+                                Select::make('akreditasi')
                                     ->label('Akreditasi')
                                     ->options([
                                         'A' => 'A (Sangat Baik)',
@@ -98,11 +115,11 @@ class SekolahResource extends Resource
                     ->collapsible()
                     ->columns(1),
 
-                Forms\Components\Section::make('Alamat & Kontak')
+                Section::make('Alamat & Kontak')
                     ->description('Informasi alamat dan kontak sekolah')
                     ->icon('heroicon-o-map-pin')
                     ->schema([
-                        Forms\Components\Textarea::make('alamat')
+                        Textarea::make('alamat')
                             ->label('Alamat Lengkap')
                             ->required()
                             ->maxLength(500)
@@ -110,9 +127,9 @@ class SekolahResource extends Resource
                             ->rows(3)
                             ->columnSpanFull(),
 
-                        Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('no_telp')
+                                TextInput::make('no_telp')
                                     ->label('Nomor Telepon')
                                     ->tel()
                                     ->required()
@@ -121,7 +138,7 @@ class SekolahResource extends Resource
                                     ->prefixIcon('heroicon-m-phone')
                                     ->helperText('Format: (kode area) nomor telepon'),
 
-                                Forms\Components\TextInput::make('email')
+                                TextInput::make('email')
                                     ->label('Email Sekolah')
                                     ->email()
                                     ->required()
@@ -135,11 +152,11 @@ class SekolahResource extends Resource
                     ->collapsible()
                     ->columns(1),
 
-                Forms\Components\Section::make('Kepala Sekolah')
+                Section::make('Kepala Sekolah')
                     ->description('Informasi kepala sekolah dan pimpinan')
                     ->icon('heroicon-o-user-circle')
                     ->schema([
-                        Forms\Components\Select::make('guru_id')
+                        Select::make('guru_id')
                             ->label('Kepala Sekolah')
                             ->options(function () {
                                 return Guru::query()
@@ -152,7 +169,7 @@ class SekolahResource extends Resource
                             ->prefixIcon('heroicon-m-user-circle')
                             ->helperText('Pilih guru yang menjabat sebagai kepala sekolah')
                             ->live()
-                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                            ->afterStateUpdated(function ($state, Set $set) {
                                 if ($state) {
                                     $guru = Guru::find($state);
                                     if ($guru) {
@@ -161,9 +178,9 @@ $set('kepala_sekolah_info', $guru->nama_guru . ($guru->nuptk ? ' (NUPTK: ' . $gu
                                 }
                             }),
 
-Forms\Components\Placeholder::make('kepala_sekolah_info')
+Placeholder::make('kepala_sekolah_info')
     ->label('Informasi Kepala Sekolah')
-    ->content(function (Forms\Get $get) {
+    ->content(function (Get $get) {
         if ($get('guru_id')) {
             $guru = Guru::find($get('guru_id'));
             if ($guru) {
@@ -181,16 +198,16 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
         }
         return 'Pilih kepala sekolah untuk melihat informasi';
     })
-    ->visible(fn (Forms\Get $get): bool => (bool) $get('guru_id')),
+    ->visible(fn (Get $get): bool => (bool) $get('guru_id')),
                     ])
                     ->collapsible()
                     ->columns(1),
 
-                Forms\Components\Section::make('Logo Sekolah')
+                Section::make('Logo Sekolah')
                     ->description('Upload logo resmi sekolah')
                     ->icon('heroicon-o-photo')
                     ->schema([
-                        Forms\Components\FileUpload::make('logo')
+                        FileUpload::make('logo')
                             ->label('Logo Sekolah')
                             ->image()
                             ->directory('sekolah/logo')
@@ -216,11 +233,11 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
                     ->collapsible()
                     ->collapsed()
                     ->columns(1),
-            Forms\Components\Section::make('Logo yayasan')
+            Section::make('Logo yayasan')
                 ->description('Upload logo resmi Yayasan')
                 ->icon('heroicon-o-photo')
                 ->schema([
-                    Forms\Components\FileUpload::make('logo_yayasan')
+                    FileUpload::make('logo_yayasan')
                         ->label('Logo Sekolah')
                         ->image()
                         ->directory('sekolah/logo_yayasan')
@@ -247,13 +264,13 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
                 ->collapsed()
                 ->columns(1),
 
-                Forms\Components\Section::make('Informasi Tambahan')
+                Section::make('Informasi Tambahan')
                     ->description('Data tambahan dan keterangan sekolah')
                     ->icon('heroicon-o-information-circle')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('website')
+                                TextInput::make('website')
                                     ->label('Website Sekolah')
                                     ->url()
                                     ->maxLength(255)
@@ -261,7 +278,7 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
                                     ->prefixIcon('heroicon-m-globe-alt')
                                     ->helperText('URL lengkap website sekolah'),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label('Status Sekolah')
                                     ->options([
                                         'Negeri' => 'Negeri',
@@ -272,21 +289,21 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
                                     ->prefixIcon('heroicon-m-building-office'),
                             ]),
 
-                        Forms\Components\Textarea::make('visi')
+                        Textarea::make('visi')
                             ->label('Visi Sekolah')
                             ->maxLength(1000)
                             ->placeholder('Masukkan visi sekolah')
                             ->rows(3)
                             ->columnSpanFull(),
 
-                        Forms\Components\Textarea::make('misi')
+                        Textarea::make('misi')
                             ->label('Misi Sekolah')
                             ->maxLength(1000)
                             ->placeholder('Masukkan misi sekolah')
                             ->rows(3)
                             ->columnSpanFull(),
 
-                        Forms\Components\Textarea::make('keterangan')
+                        Textarea::make('keterangan')
                             ->label('Keterangan Tambahan')
                             ->maxLength(500)
                             ->placeholder('Informasi tambahan tentang sekolah')
@@ -303,20 +320,20 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('logo')
+                ImageColumn::make('logo')
                     ->label('Logo')
                     ->circular()
                     ->size(60)
                     ->defaultImageUrl(url('/images/default-school-logo.png'))
                     ->toggleable(isToggledHiddenByDefault: false),
-            Tables\Columns\ImageColumn::make('logo_yayasan')
+            ImageColumn::make('logo_yayasan')
                 ->label('Logo Yayasan')
                 ->circular()
                 ->size(60)
                 ->defaultImageUrl(url('/images/default-school-logo.png'))
                 ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('nama_sekolah')
+                TextColumn::make('nama_sekolah')
                     ->label('Nama Sekolah')
                     ->searchable()
                     ->sortable()
@@ -327,7 +344,7 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
                     )
                     ->wrap(),
 
-                Tables\Columns\TextColumn::make('npsn')
+                TextColumn::make('npsn')
                     ->label('NPSN')
                     ->searchable()
                     ->sortable()
@@ -337,11 +354,11 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
                     ->color('primary')
                     ->icon('heroicon-m-identification'),
 
-                Tables\Columns\TextColumn::make('alamat')
+                TextColumn::make('alamat')
                     ->label('Alamat')
                     ->searchable()
                     ->limit(50)
-                    ->tooltip(function (Tables\Columns\TextColumn $column): ?string {
+                    ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
                         if (strlen($state) > 50) {
                             return $state;
@@ -351,7 +368,7 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
                     ->wrap()
                     ->toggleable(),
 
-                Tables\Columns\TextColumn::make('no_telp')
+                TextColumn::make('no_telp')
                     ->label('Telepon')
                     ->searchable()
                     ->copyable()
@@ -359,7 +376,7 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
                     ->icon('heroicon-m-phone')
                     ->color('success'),
 
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
                     ->copyable()
@@ -368,7 +385,7 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
                     ->color('info')
                     ->toggleable(),
 
-                Tables\Columns\TextColumn::make('akreditasi')
+                TextColumn::make('akreditasi')
                     ->label('Akreditasi')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -386,7 +403,7 @@ Forms\Components\Placeholder::make('kepala_sekolah_info')
                     })
                     ->sortable(),
 
-Tables\Columns\TextColumn::make('guru.nama_guru')
+TextColumn::make('guru.nama_guru')
     ->label('Kepala Sekolah')
     ->searchable()
     ->sortable()
@@ -396,12 +413,12 @@ Tables\Columns\TextColumn::make('guru.nama_guru')
     )
     ->wrap(),
 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -409,12 +426,12 @@ Tables\Columns\TextColumn::make('guru.nama_guru')
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -429,9 +446,9 @@ Tables\Columns\TextColumn::make('guru.nama_guru')
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSekolahs::route('/'),
-            'create' => Pages\CreateSekolah::route('/create'),
-            'edit' => Pages\EditSekolah::route('/{record}/edit'),
+            'index' => ListSekolahs::route('/'),
+            'create' => CreateSekolah::route('/create'),
+            'edit' => EditSekolah::route('/{record}/edit'),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\User;
 use App\Models\Kelas;
 use App\Models\Nilai;
 use App\Models\Periode;
@@ -56,7 +57,7 @@ class NilaiStatsWidget extends BaseWidget
         // Completion percentage
         $completionPercentage = $nilaiPeriodeAktif > 0 ?
             round(($nilaiLengkap / $nilaiPeriodeAktif) * 100, 1) : 0;
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return [
             Stat::make('Total Penilaian', $totalNilai)

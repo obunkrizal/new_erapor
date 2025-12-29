@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\HargaSppResource\Pages;
+namespace App\Filament\Resources\HargaSpps\Pages;
 
-use App\Filament\Resources\HargaSppResource;
+use Filament\Actions\DeleteAction;
+use App\Filament\Resources\HargaSpps\HargaSppResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -13,7 +14,7 @@ class EditHargaSpp extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

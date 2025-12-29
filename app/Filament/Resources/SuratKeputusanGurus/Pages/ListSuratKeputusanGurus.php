@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\SuratKeputusanGuruResource\Pages;
+namespace App\Filament\Resources\SuratKeputusanGurus\Pages;
 
-use App\Filament\Resources\SuratKeputusanGuruResource;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\SuratKeputusanGurus\SuratKeputusanGuruResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -13,7 +14,7 @@ class ListSuratKeputusanGurus extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\SuratKeputusanGurus;
 
+use Filament\Schemas\Schema;
 use Filament\Forms;
 use Filament\Tables;
-use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
@@ -14,11 +14,12 @@ use App\Filament\Resources\SuratKeputusanGuruResource\Pages;
 class SuratKeputusanGuruResource extends Resource
 {
     protected static ?string $model = null; // Set to null temporarily
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationLabel = 'Surat Keputusan Guru';
     protected static ?string $modelLabel = 'Surat Keputusan';
     protected static ?string $pluralModelLabel = 'Surat Keputusan Guru';
-    protected static ?string $navigationGroup = 'Administrasi';
+    protected static ?int $navigationSort = 7;
+    protected static string | \UnitEnum | null $navigationGroup = 'Administrasi';
 
     public static function canAccess(): bool
     {
@@ -33,9 +34,9 @@ class SuratKeputusanGuruResource extends Resource
         return false; // Prevent access
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema([]);
+        return $schema->components([]);
     }
 
     public static function table(Table $table): Table

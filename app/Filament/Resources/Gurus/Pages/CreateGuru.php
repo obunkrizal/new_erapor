@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\GuruResource\Pages;
+namespace App\Filament\Resources\Gurus\Pages;
 
-use App\Filament\Resources\GuruResource;
+use App\Filament\Resources\Gurus\GuruResource;
 use App\Models\User;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Hash;

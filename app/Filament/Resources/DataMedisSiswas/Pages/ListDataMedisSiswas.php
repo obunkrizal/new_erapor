@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\DataMedisSiswaResource\Pages;
+namespace App\Filament\Resources\DataMedisSiswas\Pages;
 
-use App\Filament\Resources\DataMedisSiswaResource;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\DataMedisSiswas\DataMedisSiswaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -13,7 +14,7 @@ class ListDataMedisSiswas extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
+            CreateAction::make()
                 ->label('Tambah Data Medis Siswa')
                 ->color('primary')
                 ->icon('heroicon-o-document-plus'),

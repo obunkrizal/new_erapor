@@ -1,11 +1,39 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\GuruNilais;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Utilities\Get;
+use App\Models\Kelas;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Exception;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Carbon\Carbon;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\Action;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\CreateAction;
+use Filament\Notifications\Notification;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkAction;
+use App\Filament\Resources\GuruNilais\Pages\ListGuruNilais;
+use App\Filament\Resources\GuruNilais\Pages\CreateGuruNilai;
+use App\Filament\Resources\GuruNilais\Pages\EditGuruNilai;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Nilai;
-use Filament\Forms\Form;
 use App\Models\KelasSiswa;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
@@ -19,11 +47,11 @@ use App\Filament\Resources\GuruNilaiResource\Pages;
 class GuruNilaiResource extends Resource
 {
     protected static ?string $model = Nilai::class;
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-check';
     protected static ?string $navigationLabel = 'Penilaian Saya';
     protected static ?string $modelLabel = 'Penilaian';
     protected static ?string $pluralModelLabel = 'Penilaian Saya';
-    protected static ?string $navigationGroup = 'Guru';
+    protected static string | \UnitEnum | null $navigationGroup = 'Guru';
     protected static ?int $navigationSort = 2;
 
     public static function shouldRegisterNavigation(): bool
@@ -90,18 +118,18 @@ class GuruNilaiResource extends Resource
         return $query->with(['siswa', 'kelas', 'periode']);
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
         $guru = Auth::user()?->guru;
 
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Informasi Penilaian')
+        return $schema
+            ->components([
+                Section::make('Informasi Penilaian')
                     ->schema([
-                        Forms\Components\Select::make('kelas_id')
+                        Select::make('kelas_id')
                             ->label('Kelas')
                             ->native(false)
-                            ->options(function () use ($guru) {
+                    ->options(function () use ($guru) {
                                 if (!$guru) return [];
 
                                 return $guru->kelas()
@@ -111,22 +139,22 @@ class GuruNilaiResource extends Resource
                             })
                             ->required()
                             ->live()
-                            ->afterStateUpdated(function (Forms\Set $set) {
+                            ->afterStateUpdated(function (Set $set) {
                                 $set('siswa_id', null);
                             })
                             ->default(fn() => request()->get('kelas_id')),
 
-                        Forms\Components\Select::make('siswa_id')
+                        Select::make('siswa_id')
                             ->label('Siswa')
-                            ->options(function (Forms\Get $get) {
+                            ->options(function (Get $get) {
                                 $kelasId = $get('kelas_id');
                                 if (!$kelasId) return [];
 
-                                $kelas = \App\Models\Kelas::find($kelasId);
+                                $kelas = Kelas::find($kelasId);
                                 $periodeId = $kelas?->periode_id;
 
                                 // Get siswa_ids who already have nilai for this kelas and periode
-                                $excludedSiswaIds = \App\Models\Nilai::where('kelas_id', $kelasId)
+                                $excludedSiswaIds = Nilai::where('kelas_id', $kelasId)
                                     ->where('periode_id', $periodeId)
                                     ->pluck('siswa_id')
                                     ->toArray();
@@ -146,18 +174,18 @@ class GuruNilaiResource extends Resource
                             })
                             ->required()
                             ->searchable()
-                            ->disabled(fn(Forms\Get $get) => empty($get('kelas_id')))
+                            ->disabled(fn(Get $get) => empty($get('kelas_id')))
                             ->default(fn() => request()->get('siswa_id'))
                             ->live(),
 
-                        Forms\Components\Hidden::make('guru_id')
+                        Hidden::make('guru_id')
                             ->default($guru?->id),
 
-                        Forms\Components\Hidden::make('periode_id')
-                            ->default(function (Forms\Get $get) {
+                        Hidden::make('periode_id')
+                            ->default(function (Get $get) {
                                 $kelasId = $get('kelas_id');
                                 if ($kelasId) {
-                                    $kelas = \App\Models\Kelas::find($kelasId);
+                                    $kelas = Kelas::find($kelasId);
                                     return $kelas?->periode_id;
                                 }
                                 return null;
@@ -165,15 +193,15 @@ class GuruNilaiResource extends Resource
                     ])
                     ->columns(2),
 
-                Forms\Components\Section::make('Nilai Agama dan Budi Pekerti')
+                Section::make('Nilai Agama dan Budi Pekerti')
                     ->schema([
-                        Forms\Components\Textarea::make('nilai_agama')
+                        Textarea::make('nilai_agama')
                             ->label('Nilai Agama dan Budi Pekerti')
                             ->rows(4)
                             ->placeholder('Masukkan penilaian agama dan budi pekerti siswa...')
                             ->columnSpanFull(),
 
-                        Forms\Components\FileUpload::make('fotoAgama')
+                        FileUpload::make('fotoAgama')
                             ->label('Foto Dokumentasi Agama')
                             ->image()
                             ->multiple()
@@ -183,15 +211,15 @@ class GuruNilaiResource extends Resource
                             ->columnSpanFull(),
                     ]),
 
-                Forms\Components\Section::make('Nilai Jati Diri')
+                Section::make('Nilai Jati Diri')
                     ->schema([
-                        Forms\Components\Textarea::make('nilai_jatiDiri')
+                        Textarea::make('nilai_jatiDiri')
                             ->label('Nilai Jati Diri')
                             ->rows(4)
                             ->placeholder('Masukkan penilaian jati diri siswa...')
                             ->columnSpanFull(),
 
-                        Forms\Components\FileUpload::make('fotoJatiDiri')
+                        FileUpload::make('fotoJatiDiri')
                             ->label('Foto Dokumentasi Jati Diri')
                             ->image()
                             ->multiple()
@@ -201,15 +229,15 @@ class GuruNilaiResource extends Resource
                             ->columnSpanFull(),
                     ]),
 
-                Forms\Components\Section::make('Nilai Literasi')
+                Section::make('Nilai Literasi')
                     ->schema([
-                        Forms\Components\Textarea::make('nilai_literasi')
+                        Textarea::make('nilai_literasi')
                             ->label('Nilai Dasar-Dasar Literasi, Matematika, Sains, Rekayasa, Teknologi, dan Seni')
                             ->rows(4)
                             ->placeholder('Masukkan penilaian literasi siswa...')
                             ->columnSpanFull(),
 
-                        Forms\Components\FileUpload::make('fotoLiterasi')
+                        FileUpload::make('fotoLiterasi')
                             ->label('Foto Dokumentasi Literasi')
                             ->image()
                             ->multiple()
@@ -219,27 +247,27 @@ class GuruNilaiResource extends Resource
                             ->columnSpanFull(),
                     ]),
 
-                Forms\Components\Section::make('Narasi Pembelajaran')
-                    ->schema([
-                        Forms\Components\Textarea::make('nilai_narasi')
-                            ->label('Narasi Pembelajaran')
-                            ->rows(4)
-                            ->placeholder('Masukkan narasi pembelajaran siswa...')
-                            ->columnSpanFull(),
+            // Forms\Components\Section::make('Narasi Pembelajaran')
+            //     ->schema([
+            //         Forms\Components\Textarea::make('nilai_narasi')
+            //             ->label('Narasi Pembelajaran')
+            //             ->rows(4)
+            //             ->placeholder('Masukkan narasi pembelajaran siswa...')
+            //             ->columnSpanFull(),
 
-                        Forms\Components\FileUpload::make('fotoNarasi')
-                            ->label('Foto Dokumentasi Narasi')
-                            ->image()
-                            ->multiple()
-                            ->directory('nilai/narasi')
-                            ->maxFiles(5)
-                            ->imageEditor()
-                            ->columnSpanFull(),
-                    ]),
+            //         Forms\Components\FileUpload::make('fotoNarasi')
+            //             ->label('Foto Dokumentasi Narasi')
+            //             ->image()
+            //             ->multiple()
+            //             ->directory('nilai/narasi')
+            //             ->maxFiles(5)
+            //             ->imageEditor()
+            //             ->columnSpanFull(),
+            //     ]),
 
-                Forms\Components\Section::make('Refleksi Guru')
+            Section::make('Refleksi Guru')
                     ->schema([
-                        Forms\Components\Textarea::make('refleksi_guru')
+                        Textarea::make('refleksi_guru')
                             ->label('Informasi Perkembangan Anak Didik')
                             ->rows(4)
                             ->placeholder('Masukkan refleksi dan informasi perkembangan anak didik...')
@@ -253,7 +281,7 @@ class GuruNilaiResource extends Resource
         return $table
             ->columns([
                 // Student Information Section
-                Tables\Columns\ImageColumn::make('siswa.foto')
+                ImageColumn::make('siswa.foto')
                     ->label('Foto')
                     ->circular()
                     ->size(60)
@@ -261,7 +289,7 @@ class GuruNilaiResource extends Resource
                     ->extraAttributes(['class' => 'shadow-md'])
                     ->toggleable(isToggledHiddenByDefault: false),
 
-                Tables\Columns\TextColumn::make('siswa.nama_lengkap')
+                TextColumn::make('siswa.nama_lengkap')
                     ->label('Data Siswa')
                     ->searchable(['siswa.nama_lengkap', 'siswa.name', 'siswa.nis'])
                     ->sortable()
@@ -279,7 +307,7 @@ class GuruNilaiResource extends Resource
 
 
 
-                Tables\Columns\TextColumn::make('guru.nama_guru')
+                TextColumn::make('guru.nama_guru')
                     ->label('Guru Pengajar')
                     ->searchable(['guru.nama_guru', 'guru.name'])
                     ->sortable()
@@ -294,7 +322,7 @@ class GuruNilaiResource extends Resource
                     ->icon('heroicon-m-user')
                     ->color('info')
                     ->toggleable(),
-            Tables\Columns\TextColumn::make('nilai_icons')
+            TextColumn::make('nilai_icons')
                 ->label('Status Nilai')
                 ->tooltip('Jika Ada Tanda Silang Mohon dilengkapi dulu')
                 ->getStateUsing(function ($record) {
@@ -302,8 +330,8 @@ class GuruNilaiResource extends Resource
                         'Agama' => !empty($record->nilai_agama),
                         'Jati Diri' => !empty($record->nilai_jatiDiri),
                         'Literasi' => !empty($record->nilai_literasi),
-                        'Narasi' => !empty($record->nilai_narasi),
-                        'Refleksi' => !empty($record->refleksi_guru),
+                    // 'Narasi' => !empty($record->nilai_narasi),
+                    'Refleksi' => !empty($record->refleksi_guru),
                     ];
 
                     $result = [];
@@ -318,7 +346,7 @@ class GuruNilaiResource extends Resource
                 ->wrap()
                 ->sortable(),
 
-            Tables\Columns\TextColumn::make('photo_summary')
+            TextColumn::make('photo_summary')
                 ->label('Dokumentasi')
                 ->getStateUsing(function (Nilai $record): string {
                     try {
@@ -336,8 +364,8 @@ class GuruNilaiResource extends Resource
                                     'fotoAgama' => 'Agama',
                                     'fotoJatiDiri' => 'Jati Diri',
                                     'fotoLiterasi' => 'Literasi',
-                                    'fotoNarasi' => 'Narasi',
-                                    default => $field
+                                // 'fotoNarasi' => 'Narasi',
+                                default => $field
                                 };
                                 $photoDetails[] = "{$label}: {$count}";
                             }
@@ -348,7 +376,7 @@ class GuruNilaiResource extends Resource
                         }
 
                         return "{$totalCount} foto total";
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         Log::error("Error getting photo summary: " . $e->getMessage());
                         return 'Error loading photos';
                     }
@@ -372,7 +400,8 @@ class GuruNilaiResource extends Resource
                 })
                 ->tooltip(function (Nilai $record): string {
                     try {
-                        $fields = ['fotoAgama', 'fotoJatiDiri', 'fotoLiterasi', 'fotoNarasi'];
+                    // $fields = ['fotoAgama', 'fotoJatiDiri', 'fotoLiterasi', 'fotoNarasi'];
+                    $fields = ['fotoAgama', 'fotoJatiDiri', 'fotoLiterasi'];
                         $details = [];
 
                         foreach ($fields as $field) {
@@ -384,21 +413,21 @@ class GuruNilaiResource extends Resource
                                     'fotoAgama' => 'Agama',
                                     'fotoJatiDiri' => 'Jati Diri',
                                     'fotoLiterasi' => 'Literasi',
-                                    'fotoNarasi' => 'Narasi',
-                                    default => $field
+                                // 'fotoNarasi' => 'Narasi',
+                                default => $field
                                 };
                                 $details[] = "{$label}: {$count} foto";
                             }
                         }
 
                         return $details ? implode(' | ', $details) : 'Tidak ada dokumentasi foto';
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         return 'Error loading photo details';
                     }
                 })
                 ->toggleable(),
             // Nilai Section - Grouped Layout
-            Tables\Columns\TextColumn::make('status_check')
+            TextColumn::make('status_check')
                 ->label('Status Data')
                 ->tooltip('Jika Ada Tanda Silang Mohon dilengkapi dulu')
                 ->getStateUsing(function ($record) {
@@ -423,7 +452,7 @@ class GuruNilaiResource extends Resource
                         }
 
                         return implode(' | ', $statusParts);
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         return 'Error: ' . $e->getMessage();
                     }
                 })
@@ -477,7 +506,7 @@ class GuruNilaiResource extends Resource
 
 
                 // Timestamps
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y')
                     ->sortable()
@@ -487,7 +516,7 @@ class GuruNilaiResource extends Resource
                     ->tooltip(fn(Nilai $record): string => $record->created_at?->format('d F Y, H:i') ?? '')
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label('Terakhir Diperbarui')
                     ->dateTime('d M Y')
                     ->sortable()
@@ -498,7 +527,7 @@ class GuruNilaiResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('periode_id')
+                SelectFilter::make('periode_id')
                     ->label('Periode')
                     ->relationship('periode', 'nama_periode')
                     ->searchable()
@@ -506,7 +535,7 @@ class GuruNilaiResource extends Resource
                     ->multiple()
                     ->placeholder('Semua Periode'),
 
-                Tables\Filters\SelectFilter::make('kelas_id')
+                SelectFilter::make('kelas_id')
                     ->label('Kelas')
                     ->relationship('kelas', 'nama_kelas')
                     ->searchable()
@@ -514,7 +543,7 @@ class GuruNilaiResource extends Resource
                     ->multiple()
                     ->placeholder('Semua Kelas'),
 
-                Tables\Filters\SelectFilter::make('guru_id')
+                SelectFilter::make('guru_id')
                     ->label('Guru')
                     ->relationship('guru', 'nama_guru')
                     ->searchable()
@@ -522,34 +551,34 @@ class GuruNilaiResource extends Resource
                     ->multiple()
                     ->placeholder('Semua Guru'),
 
-                Tables\Filters\Filter::make('has_photos')
+                Filter::make('has_photos')
                     ->label('Ada Dokumentasi')
                     ->query(function (Builder $query): Builder {
                         return $query->where(function ($q) {
                             $q->whereNotNull('fotoAgama')
                                 ->orWhereNotNull('fotoJatiDiri')
-                                ->orWhereNotNull('fotoLiterasi')
-                                ->orWhereNotNull('fotoNarasi');
-                        });
+                        ->orWhereNotNull('fotoLiterasi');
+                    // ->orWhereNotNull('fotoNarasi');
+                });
                     })
                     ->toggle(),
 
-                Tables\Filters\Filter::make('complete_nilai')
+                Filter::make('complete_nilai')
                     ->label('Nilai Lengkap')
                     ->query(function (Builder $query): Builder {
                         return $query->whereNotNull('nilai_agama')
                             ->whereNotNull('nilai_jatiDiri')
-                            ->whereNotNull('nilai_literasi')
-                            ->whereNotNull('nilai_narasi');
-                    })
+                    ->whereNotNull('nilai_literasi');
+                // ->whereNotNull('nilai_narasi');
+            })
                     ->toggle(),
 
-                Tables\Filters\Filter::make('created_date')
-                    ->form([
-                        Forms\Components\DatePicker::make('created_from')
+                Filter::make('created_date')
+                    ->schema([
+                        DatePicker::make('created_from')
                             ->label('Dari Tanggal')
                             ->native(false),
-                        Forms\Components\DatePicker::make('created_until')
+                        DatePicker::make('created_until')
                             ->label('Sampai Tanggal')
                             ->native(false),
                     ])
@@ -567,17 +596,17 @@ class GuruNilaiResource extends Resource
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if ($data['created_from'] ?? null) {
-                            $indicators[] = 'Dari: ' . \Carbon\Carbon::parse($data['created_from'])->format('d M Y');
+                            $indicators[] = 'Dari: ' . Carbon::parse($data['created_from'])->format('d M Y');
                         }
                         if ($data['created_until'] ?? null) {
-                            $indicators[] = 'Sampai: ' . \Carbon\Carbon::parse($data['created_until'])->format('d M Y');
+                            $indicators[] = 'Sampai: ' . Carbon::parse($data['created_until'])->format('d M Y');
                         }
                         return $indicators;
                     }),
             ])
-            ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('print')
+            ->recordActions([
+                ActionGroup::make([
+                    Action::make('print')
                         ->label('Print Raport')
                         ->icon('heroicon-o-printer')
                         ->color('success')
@@ -585,18 +614,20 @@ class GuruNilaiResource extends Resource
                         ->openUrlInNewTab(),
 
 
-                    Tables\Actions\Action::make('view_photos')
+                    Action::make('view_photos')
                         ->label('Lihat Foto')
                         ->icon('heroicon-o-photo')
                         ->color('info')
                         ->modalHeading('Dokumentasi Pembelajaran')
                         ->modalContent(fn(Nilai $record) => view('filament.modals.photo-gallery', [
                             'record' => $record,
-                            'fields' => ['fotoAgama', 'fotoJatiDiri', 'fotoLiterasi', 'fotoNarasi']
+                            // 'fields' => ['fotoAgama', 'fotoJatiDiri', 'fotoLiterasi', 'fotoNarasi']
+                            'fields' => ['fotoAgama', 'fotoJatiDiri', 'fotoLiterasi']
                         ]))
                         ->modalWidth('5xl')
                         ->visible(function (Nilai $record): bool {
-                            $fields = ['fotoAgama', 'fotoJatiDiri', 'fotoLiterasi', 'fotoNarasi'];
+                            // $fields = ['fotoAgama', 'fotoJatiDiri', 'fotoLiterasi', 'fotoNarasi'];
+                            $fields = ['fotoAgama', 'fotoJatiDiri', 'fotoLiterasi'];
                             foreach ($fields as $field) {
                                 if (!empty($record->getImageUrls($field))) {
                                     return true;
@@ -605,13 +636,13 @@ class GuruNilaiResource extends Resource
                             return false;
                         }),
 
-                    Tables\Actions\ViewAction::make()
+                    ViewAction::make()
                         ->color('gray'),
 
-                    Tables\Actions\EditAction::make()
+                    EditAction::make()
                         ->color('warning'),
 
-                    Tables\Actions\DeleteAction::make()
+                    DeleteAction::make()
                         ->requiresConfirmation()
                         ->modalDescription('Apakah Anda yakin ingin menghapus data nilai ini? Tindakan ini tidak dapat dibatalkan.')
                         ->modalHeading('Hapus Data Nilai')
@@ -624,34 +655,34 @@ class GuruNilaiResource extends Resource
                     ->button(),
             ])
             ->headerActions([
-            Tables\Actions\CreateAction::make()
+            CreateAction::make()
                 ->label('Buat Penilaian Baru')
                 ->icon('heroicon-m-document-plus'),
-                Tables\Actions\Action::make('export_all')
+                Action::make('export_all')
                     ->label('Export Semua Data')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('info')
                     ->action(function () {
                         // Implement export functionality
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Export Data')
                             ->body('Fitur export akan segera tersedia')
                             ->info()
                             ->send();
                     }),
-                Tables\Actions\Action::make('refresh')
+                Action::make('refresh')
                     ->label('Refresh')
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
                         ->requiresConfirmation()
                         ->modalDescription('Apakah Anda yakin ingin menghapus semua data nilai yang dipilih? Tindakan ini tidak dapat dibatalkan.')
                         ->modalHeading('Hapus Data Nilai Terpilih'),
 
-                    Tables\Actions\BulkAction::make('export_excel')
+                    BulkAction::make('export_excel')
                         ->label('Export Excel')
                         ->icon('heroicon-o-document-arrow-down')
                         ->color('info')
@@ -696,9 +727,9 @@ class GuruNilaiResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListGuruNilais::route('/'),
-            'create' => Pages\CreateGuruNilai::route('/create'),
-            'edit' => Pages\EditGuruNilai::route('/{record}/edit'),
+            'index' => ListGuruNilais::route('/'),
+            'create' => CreateGuruNilai::route('/create'),
+            'edit' => EditGuruNilai::route('/{record}/edit'),
         ];
     }
 }

@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use Laravolt\Indonesia\Models\Province;
+use Laravolt\Indonesia\Models\City;
+use Laravolt\Indonesia\Models\District;
+use Laravolt\Indonesia\Models\Village;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -96,7 +100,7 @@ class Siswa extends Model
     public static function generateNISByPeriode(): string
     {
         // Get active periode
-        $activePeriode = \App\Models\Periode::where('is_active', true)->first();
+        $activePeriode = Periode::where('is_active', true)->first();
 
         if ($activePeriode && $activePeriode->tahun_ajaran) {
             // Extract years from tahun_ajaran (e.g., "2025/2026")
@@ -243,21 +247,28 @@ class Siswa extends Model
     // Relationships for address
     public function provinsi(): BelongsTo
     {
-        return $this->belongsTo(\Laravolt\Indonesia\Models\Province::class, 'provinsi_id');
+        return $this->belongsTo(Province::class, 'provinsi_id');
     }
 
     public function kota(): BelongsTo
     {
-        return $this->belongsTo(\Laravolt\Indonesia\Models\City::class, 'kota_id');
+        return $this->belongsTo(City::class, 'kota_id');
     }
 
     public function kecamatan(): BelongsTo
     {
-        return $this->belongsTo(\Laravolt\Indonesia\Models\District::class, 'kecamatan_id');
+        return $this->belongsTo(District::class, 'kecamatan_id');
     }
 
     public function kelurahan(): BelongsTo
     {
-        return $this->belongsTo(\Laravolt\Indonesia\Models\Village::class, 'kelurahan_id');
+        return $this->belongsTo(Village::class, 'kelurahan_id');
+    }
+
+    public function ekstrakurikulers()
+    {
+        return $this->belongsToMany(Ekstrakurikuler::class, 'siswa_ekstrakurikuler')
+            ->withPivot('periode_id', 'capaian')
+            ->withTimestamps();
     }
 }

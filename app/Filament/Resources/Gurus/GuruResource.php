@@ -1,31 +1,44 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\Gurus;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\Placeholder;
+use Filament\Schemas\Components\Actions;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Support\Enums\Size;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\Gurus\Pages\ListGurus;
+use App\Filament\Resources\Gurus\Pages\CreateGuru;
+use App\Filament\Resources\Gurus\Pages\EditGuru;
 use Filament\Forms;
 use App\Models\Guru;
 use App\Models\User;
 use Filament\Tables;
-use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Resources\Resource;
 use Illuminate\Support\Collection;
-use Filament\Tables\Actions\Action;
 use Laravolt\Indonesia\Models\City;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Section;
-use Filament\Support\Enums\ActionSize;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Laravolt\Indonesia\Models\District;
 use Laravolt\Indonesia\Models\Province;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -38,7 +51,7 @@ class GuruResource extends Resource
 {
     protected static ?string $model = Guru::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-academic-cap';
 
     protected static ?string $navigationLabel = 'Manajemen Guru';
 
@@ -46,14 +59,14 @@ class GuruResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Manajemen Guru';
 
-    protected static ?string $navigationGroup = 'Data Master';
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Master';
 
     protected static ?int $navigationSort = 2;
 
     // Hide navigation for guru
     public static function shouldRegisterNavigation(): bool
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return $user && $user->isAdmin();
     }
@@ -61,45 +74,45 @@ class GuruResource extends Resource
     // Control access - only admin can access
     public static function canAccess(): bool
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return $user && $user->isAdmin();
     }
 
     public static function canCreate(): bool
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return $user && $user->isAdmin();
     }
 
     public static function canEdit($record): bool
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return $user && $user->isAdmin();
     }
 
     public static function canDelete($record): bool
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return $user && $user->isAdmin();
     }
 
     public static function canDeleteAny(): bool
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return $user && $user->isAdmin();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Akun User')
                     ->description('Buat akun login untuk guru')
                     ->icon('heroicon-o-user-circle')
@@ -117,9 +130,9 @@ class GuruResource extends Resource
                             ->unique('users', 'email')
                             ->placeholder('email@example.com')
                             ->helperText('Email untuk login ke sistem')
-                            ->visible(fn (Forms\Get $get, string $operation): bool =>
+                            ->visible(fn (Get $get, string $operation): bool =>
                                 $operation === 'create' && $get('create_user_account'))
-                            ->required(fn (Forms\Get $get, string $operation): bool =>
+                            ->required(fn (Get $get, string $operation): bool =>
                                 $operation === 'create' && $get('create_user_account')),
 
                         TextInput::make('user_password')
@@ -127,10 +140,10 @@ class GuruResource extends Resource
                             ->password()
                             ->placeholder('Minimal 8 karakter')
                             ->helperText('Kosongkan untuk generate otomatis')
-                            ->visible(fn (Forms\Get $get, string $operation): bool =>
+                            ->visible(fn (Get $get, string $operation): bool =>
                                 $operation === 'create' && $get('create_user_account')),
 
-                        Forms\Components\Placeholder::make('existing_user')
+                        Placeholder::make('existing_user')
                             ->label('Status Akun')
                             ->content(function (?Guru $record) {
                                 if (!$record || !$record->user) {
@@ -141,14 +154,14 @@ class GuruResource extends Resource
                             ->visible(fn (string $operation): bool => $operation === 'edit'),
 
                         // Action to create user for existing guru
-                        Forms\Components\Actions::make([
-                            Forms\Components\Actions\Action::make('create_user')
+                        Actions::make([
+                            Action::make('create_user')
                                 ->label('Buat Akun User')
                                 ->icon('heroicon-o-user-plus')
                                 ->color('success')
                                 ->visible(fn (?Guru $record): bool =>
                                     $record && !$record->user_id)
-                                ->form([
+                                ->schema([
                                     TextInput::make('email')
                                         ->label('Email')
                                         ->email()
@@ -318,7 +331,7 @@ class GuruResource extends Resource
                             ->required()
                             ->native(false)
                             ->live()
-                            ->afterStateUpdated(function (Forms\Set $set) {
+                            ->afterStateUpdated(function (Set $set) {
                                 $set('kota_id', null);
                                 $set('kecamatan_id', null);
                                 $set('kelurahan_id', null);
@@ -327,7 +340,7 @@ class GuruResource extends Resource
                         Select::make('kota_id')
                             ->label('Kota/Kabupaten')
                             ->placeholder('Pilih Kota/Kabupaten')
-                            ->options(function (Forms\Get $get) {
+                            ->options(function (Get $get) {
                                 $provinceId = $get('provinsi_id');
                                 if (!$provinceId) return [];
                                 return Province::find($provinceId)?->cities()->pluck('name', 'id') ?? [];
@@ -336,16 +349,16 @@ class GuruResource extends Resource
                             ->required()
                             ->native(false)
                             ->live()
-                            ->afterStateUpdated(function (Forms\Set $set) {
+                            ->afterStateUpdated(function (Set $set) {
                                 $set('kecamatan_id', null);
                                 $set('kelurahan_id', null);
                             })
-                            ->disabled(fn(Forms\Get $get): bool => !$get('provinsi_id')),
+                            ->disabled(fn(Get $get): bool => !$get('provinsi_id')),
 
                         Select::make('kecamatan_id')
                             ->label('Kecamatan')
                             ->placeholder('Pilih Kecamatan')
-                            ->options(function (Forms\Get $get) {
+                            ->options(function (Get $get) {
                                 $cityId = $get('kota_id');
                                 if (!$cityId) return [];
                                 return City::find($cityId)?->districts()->pluck('name', 'id') ?? [];
@@ -354,15 +367,15 @@ class GuruResource extends Resource
                             ->required()
                             ->native(false)
                             ->live()
-                            ->afterStateUpdated(function (Forms\Set $set) {
+                            ->afterStateUpdated(function (Set $set) {
                                 $set('kelurahan_id', null);
                             })
-                            ->disabled(fn(Forms\Get $get): bool => !$get('kota_id')),
+                            ->disabled(fn(Get $get): bool => !$get('kota_id')),
 
                         Select::make('kelurahan_id')
                             ->label('Kelurahan/Desa')
                             ->placeholder('Pilih Kelurahan/Desa')
-                            ->options(function (Forms\Get $get) {
+                            ->options(function (Get $get) {
                                 $districtId = $get('kecamatan_id');
                                 if (!$districtId) return [];
                                 return District::find($districtId)?->villages()->pluck('name', 'id') ?? [];
@@ -370,7 +383,7 @@ class GuruResource extends Resource
                             ->searchable()
                             ->required()
                             ->native(false)
-                            ->disabled(fn(Forms\Get $get): bool => !$get('kecamatan_id')),
+                            ->disabled(fn(Get $get): bool => !$get('kecamatan_id')),
                     ])
                     ->collapsible()
                     ->columns(2),
@@ -397,7 +410,7 @@ class GuruResource extends Resource
 
     public static function table(Table $table): Table
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return $table
             ->columns([
@@ -479,27 +492,27 @@ class GuruResource extends Resource
                 //
             ])
             ->headerActions([
-                Tables\Actions\Action::make('printAllGuru')
+                Action::make('printAllGuru')
                     ->label('Print All Data Guru')
                     ->icon('heroicon-o-printer')
                     ->color('success')
                     ->url(route('guru.print-report'))
                     ->openUrlInNewTab()
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                Tables\Actions\ViewAction::make()
+                ViewAction::make()
                     ->color('info'),
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->color('warning')
                     ->visible(fn() => $user?->isAdmin()),
-                Tables\Actions\Action::make('print')
+                Action::make('print')
                     ->label('Print')
                     ->icon('heroicon-o-printer')
                     ->color('success')
                     ->url(fn(Guru $record): string => route('guru.print', $record))
                     ->openUrlInNewTab(),
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->requiresConfirmation()
                     ->modalHeading('Hapus Data Siswa')
                     ->modalDescription('Apakah Anda yakin ingin menghapus data siswa ini? Tindakan ini tidak dapat dibatalkan.')
@@ -507,19 +520,19 @@ class GuruResource extends Resource
                     ->visible(fn() => $user?->isAdmin()),
                 ])
                 ->button()
-                ->size(ActionSize::Small)
+                ->size(Size::Small)
                 ->label('Aksi')
                 ->tooltip('Aksi')
 
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
                         ->visible(fn() => $user?->isAdmin()),
                 ]),
             ])
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->label('Tambah Guru Pertama')
                     ->icon('heroicon-m-plus'),
             ])
@@ -544,16 +557,16 @@ class GuruResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListGurus::route('/'),
-            'create' => Pages\CreateGuru::route('/create'),
+            'index' => ListGurus::route('/'),
+            'create' => CreateGuru::route('/create'),
             // 'view' => Pages\ViewGuru::route('/{record}'),
-            'edit' => Pages\EditGuru::route('/{record}/edit'),
+            'edit' => EditGuru::route('/{record}/edit'),
         ];
     }
 
     public static function getNavigationBadge(): ?string
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
 
         if (!$user?->isAdmin()) {

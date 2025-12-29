@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\SiswaResource\Pages;
+namespace App\Filament\Resources\Siswas\Pages;
 
-use App\Filament\Resources\SiswaResource;
+use App\Filament\Resources\Siswas\SiswaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 

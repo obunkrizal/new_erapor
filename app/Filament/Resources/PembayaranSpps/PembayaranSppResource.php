@@ -1,14 +1,30 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\PembayaranSpps;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\HtmlString;
+use Filament\Notifications\Notification;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\PembayaranSpps\Pages\ListPembayaranSpps;
+use App\Filament\Resources\PembayaranSpps\Pages\CreatePembayaranSpp;
+use App\Filament\Resources\PembayaranSpps\Pages\EditPembayaranSpp;
+use Exception;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\Periode;
 use App\Models\HargaSpp;
-use Filament\Forms\Form;
 use App\Models\KelasSiswa;
 use Filament\Tables\Table;
 use App\Models\PembayaranSpp;
@@ -16,23 +32,19 @@ use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Actions\Action;
 use App\Filament\Resources\PembayaranSppResource\Pages;
-use Filament\Tables\Actions\Action as ActionsAction;
 use Filament\Tables\Actions\Modal\Actions\Action as ModalActionsAction;
 
 class PembayaranSppResource extends Resource
 {
     protected static ?string $model = PembayaranSpp::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-banknotes';
 
     protected static ?string $navigationLabel = 'Pembayaran SPP';
 
@@ -40,9 +52,9 @@ class PembayaranSppResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Pembayaran SPP';
 
-    protected static ?string $navigationGroup = 'Transaksi SPP';
+    protected static string | \UnitEnum | null $navigationGroup = 'Transaksi SPP';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 6;
 
 
     public static function shouldRegisterNavigation(): bool
@@ -55,15 +67,15 @@ class PembayaranSppResource extends Resource
         return false;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Informasi Periode & Kelas')
+        return $schema
+            ->components([
+                Section::make('Informasi Periode & Kelas')
                     ->description('Pilih periode dan kelas untuk mengelola siswa')
                     ->icon('heroicon-o-calendar-days')
                     ->schema([
-                        Forms\Components\Select::make('periode_id')
+                Select::make('periode_id')
                             ->label('Periode')
                             ->options(self::getPeriodeOptions())
                             ->default(self::getActivePeriodeId())
@@ -80,7 +92,7 @@ class PembayaranSppResource extends Resource
                             ->live()
                             ->helperText('Pilih periode akademik yang aktif'),
 
-                        Forms\Components\Select::make('kelas_id')
+                Select::make('kelas_id')
                             ->label('Kelas')
                             ->options(function (callable $get) {
                                 $periodeId = $get('periode_id');
@@ -114,9 +126,9 @@ class PembayaranSppResource extends Resource
 
                 Section::make('Informasi Siswa')
                     ->schema([
-                        Forms\Components\Select::make('siswa_id')
+                Select::make('siswa_id')
                             ->label('Siswa')
-                            ->options(function (Forms\Get $get) {
+                    ->options(function (Get $get) {
                                 $kelasId = $get('kelas_id');
                                 if (!$kelasId) return [];
 
@@ -134,14 +146,14 @@ class PembayaranSppResource extends Resource
                             })
                             ->required()
                             ->searchable()
-                            ->disabled(fn(Forms\Get $get) => empty($get('kelas_id'))),
+                    ->disabled(fn(Get $get) => empty($get('kelas_id'))),
 
                         TextInput::make('no_inv')
                             ->label('Nomor Invoice')
-                            ->default(fn(Forms\Get $get) => $get('no_inv') ?? 'INV-' . now()->format('Ymd') . '-' . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT))
+                    ->default(fn(Get $get) => $get('no_inv') ?? 'INV-' . now()->format('Ymd') . '-' . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT))
                             ->columnSpan(2)
                             ->suffixAction(
-                                Action::make('refreshInvoice')
+                    \Filament\Actions\Action::make('refreshInvoice')
                                     ->label('Generate')
                                     ->icon('heroicon-o-arrow-path')
                                     ->action(function (callable $set) {
@@ -153,9 +165,9 @@ class PembayaranSppResource extends Resource
             // Add section to show current SPP prices for reference
             Section::make('Referensi Harga SPP')
                 ->schema([
-                    Forms\Components\Placeholder::make('harga_spp_info')
+                Placeholder::make('harga_spp_info')
                         ->label('')
-                        ->content(function (Forms\Get $get) {
+                    ->content(function (Get $get) {
                             $periodeId = $get('periode_id');
                             if (!$periodeId) {
                                 return 'Pilih periode untuk melihat daftar harga SPP';
@@ -183,7 +195,7 @@ class PembayaranSppResource extends Resource
                             }
 
                             $html .= '</div>';
-                            return new \Illuminate\Support\HtmlString($html);
+                    return new HtmlString($html);
                         })
                 ])
                 ->collapsible()
@@ -196,7 +208,7 @@ class PembayaranSppResource extends Resource
                             ->numeric()
                             ->prefix('Rp')
                             ->live()
-                            ->afterStateHydrated(function (Forms\Components\TextInput $component, Forms\Get $get, ?Model $record) {
+                    ->afterStateHydrated(function (TextInput $component, Get $get, ?Model $record) {
                                 // Only auto-populate for new records
                                 if (!$record) {
                                     $kelasId = $get('kelas_id');
@@ -211,7 +223,7 @@ class PembayaranSppResource extends Resource
                                 }
                             })
                             ->suffixAction(
-                                Action::make('loadHargaSpp')
+                    \Filament\Actions\Action::make('loadHargaSpp')
                                     ->label('Load Harga')
                                     ->icon('heroicon-o-currency-dollar')
                                     ->action(function (callable $set, callable $get) {
@@ -223,8 +235,8 @@ class PembayaranSppResource extends Resource
                                             if ($harga > 0) {
                                                 $set('amount', $harga);
                                             } else {
-                                                // Show notification if no price found
-                                                \Filament\Notifications\Notification::make()
+                                // Show notification if no price found
+                                Notification::make()
                                                     ->title('Harga SPP tidak ditemukan')
                                                     ->body('Silakan set harga SPP untuk kelas ini di menu Harga SPP')
                                                     ->warning()
@@ -234,7 +246,7 @@ class PembayaranSppResource extends Resource
                                     })
                             )
                             ->columnSpanFull()
-                            ->helperText(function (Forms\Get $get) {
+                    ->helperText(function (Get $get) {
                                 $kelasId = $get('kelas_id');
                                 $periodeId = $get('periode_id');
 
@@ -427,7 +439,7 @@ class PembayaranSppResource extends Resource
 
         ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
+            SelectFilter::make('status')
                     ->label('Status Pembayaran')
                     ->options([
                         'pending' => 'Pending',
@@ -437,40 +449,40 @@ class PembayaranSppResource extends Resource
                     ->placeholder('Semua Status')
                     ->native(false),
 
-                Tables\Filters\SelectFilter::make('periode_id')
+            SelectFilter::make('periode_id')
                     ->label('Periode')
                     ->relationship('periode', 'nama_periode')
                     ->searchable()
                     ->preload(),
 
-                Tables\Filters\SelectFilter::make('siswa_id')
+            SelectFilter::make('siswa_id')
                     ->label('Siswa')
                     ->relationship('siswa', 'nama_lengkap')
                     ->searchable()
                     ->preload(),
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                    Tables\Actions\ViewAction::make()
+                ViewAction::make()
                         ->color('info'),
 
-                    Tables\Actions\Action::make('printInvoice')
+                \Filament\Actions\Action::make('printInvoice')
                         ->label('Cetak Struk')
                         ->icon('heroicon-o-printer')
                         ->url(fn($record) => route('pembayaran-spp.print-invoice', $record->id))
                         ->openUrlInNewTab()
                         ->color('secondary'),
 
-                    Tables\Actions\EditAction::make()
+                EditAction::make()
                         ->color('warning'),
 
-                    Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                         ->requiresConfirmation()
                         ->modalHeading('Hapus Data Pembayaran SPP')
                         ->modalDescription('Apakah Anda yakin ingin menghapus data pembayaran ini? Tindakan ini tidak dapat dibatalkan.')
                         ->modalSubmitActionLabel('Ya, Hapus'),
 
-                Tables\Actions\Action::make('createTagihanSisa')
+                \Filament\Actions\Action::make('createTagihanSisa')
                     ->label('Buat Tagihan Sisa')
                     ->icon('heroicon-o-document-plus')
                     ->color('warning')
@@ -479,13 +491,13 @@ class PembayaranSppResource extends Resource
                         $tagihanSisa = $record->createTagihanSisa();
 
                         if ($tagihanSisa) {
-                            \Filament\Notifications\Notification::make()
+                        Notification::make()
                                 ->title('Tagihan Sisa Berhasil Dibuat')
                                 ->body('Tagihan sisa pembayaran sebesar ' . $tagihanSisa->sisa_pembayaran_formatted . ' telah dibuat untuk siswa ' . $record->siswa->nama_lengkap)
                                 ->success()
                                 ->send();
                         } else {
-                            \Filament\Notifications\Notification::make()
+                        Notification::make()
                                 ->title('Tidak Perlu Tagihan Sisa')
                                 ->body('Pembayaran sudah lunas, tidak perlu dibuat tagihan sisa')
                                 ->warning()
@@ -500,20 +512,20 @@ class PembayaranSppResource extends Resource
                     ->label('Aksi')
             ])
             ->headerActions([
-                Tables\Actions\Action::make('print-report')
+            \Filament\Actions\Action::make('print-report')
                     ->label('Print Report All')
                     ->icon('heroicon-o-printer')
                     ->color('success')
                 ->url(route('pembayaran-spp.print-laporan'))
                     ->openUrlInNewTab(),
-                  Tables\Actions\Action::make('refresh')
+            \Filament\Actions\Action::make('refresh')
                     ->label('Refresh')
                 ->icon('heroicon-o-arrow-path')
                 ->color('warning')
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
                         ->requiresConfirmation()
                         ->modalHeading('Hapus Data Pembayaran SPP Terpilih')
                         ->modalDescription('Apakah Anda yakin ingin menghapus semua data pembayaran yang dipilih? Tindakan ini tidak dapat dibatalkan.')
@@ -539,9 +551,9 @@ class PembayaranSppResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPembayaranSpps::route('/'),
-            'create' => Pages\CreatePembayaranSpp::route('/create'),
-            'edit' => Pages\EditPembayaranSpp::route('/{record}/edit'),
+            'index' => ListPembayaranSpps::route('/'),
+            'create' => CreatePembayaranSpp::route('/create'),
+            'edit' => EditPembayaranSpp::route('/{record}/edit'),
         ];
     }
 
@@ -576,7 +588,7 @@ class PembayaranSppResource extends Resource
                 ->orderBy('nama_kelas')
                 ->pluck('nama_kelas', 'id')
                 ->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to load kelas options: ' . $e->getMessage());
             return [];
         }
@@ -659,7 +671,7 @@ class PembayaranSppResource extends Resource
             }
 
             return 0;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to get SPP price for class: ' . $e->getMessage(), [
                 'periode_id' => $periodeId,
                 'kelas_id' => $kelasId
@@ -687,7 +699,7 @@ class PembayaranSppResource extends Resource
                 ->orderBy('created_at', 'desc')
                 ->get()
                 ->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to get all SPP prices for period: ' . $e->getMessage(), [
                 'periode_id' => $periodeId
             ]);

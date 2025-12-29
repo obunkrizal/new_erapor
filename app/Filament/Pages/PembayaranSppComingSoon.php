@@ -2,15 +2,16 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\User;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 
 class PembayaranSppComingSoon extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-banknotes';
     protected static ?string $navigationLabel = 'Pembayaran SPP';
-    protected static ?string $navigationGroup = 'Transaksi SPP';
-    protected static string $view = 'filament.pages.spp-coming-soon';
+    protected static string | \UnitEnum | null $navigationGroup = 'Transaksi SPP';
+    protected string $view = 'filament.pages.spp-coming-soon';
     protected static ?string $title = 'Coming Soon!!';
 
     public static function getNavigationBadge(): ?string
@@ -31,7 +32,7 @@ class PembayaranSppComingSoon extends Page
 
     public static function canAccess(): bool
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         return $user && $user->isAdmin();
     }

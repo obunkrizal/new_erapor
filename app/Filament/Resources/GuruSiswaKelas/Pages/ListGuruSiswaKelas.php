@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Filament\Resources\GuruSiswaKelasResource\Pages;
+namespace App\Filament\Resources\GuruSiswaKelas\Pages;
 
-use App\Filament\Resources\GuruSiswaKelasResource;
+use Filament\Schemas\Components\Tabs\Tab;
+use App\Models\Kelas;
+use App\Filament\Resources\GuruSiswaKelas\GuruSiswaKelasResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListGuruSiswaKelas extends ListRecords
@@ -43,7 +44,7 @@ class ListGuruSiswaKelas extends ListRecords
     {
         $kelasId = request()->get('kelas');
         if ($kelasId) {
-            $kelas = \App\Models\Kelas::find($kelasId);
+            $kelas = Kelas::find($kelasId);
             return $kelas ? "Siswa Kelas {$kelas->nama_kelas}" : 'Siswa Kelas';
         }
         return 'Siswa Kelas';
