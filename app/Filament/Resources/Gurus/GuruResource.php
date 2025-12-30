@@ -127,7 +127,7 @@ class GuruResource extends Resource
                         TextInput::make('user_email')
                             ->label('Email Login')
                             ->email()
-                            ->unique('users', 'email')
+                    ->unique(table: 'users', column: 'email', ignoreRecord: false)
                             ->placeholder('email@example.com')
                             ->helperText('Email untuk login ke sistem')
                             ->visible(fn (Get $get, string $operation): bool =>
@@ -166,7 +166,7 @@ class GuruResource extends Resource
                                         ->label('Email')
                                         ->email()
                                         ->required()
-                                        ->unique('users', 'email')
+                            ->unique(table: 'users', column: 'email', ignoreRecord: false)
                                         ->default(fn (?Guru $record) => $record?->nama_guru ?
                                             strtolower(str_replace(' ', '', $record->nama_guru)) . '@school.com' : ''),
 
@@ -178,7 +178,7 @@ class GuruResource extends Resource
                                 ->action(function (array $data, ?Guru $record) {
                                     if (!$record) return;
 
-                                    $password = $data['password'] ?: Str::random(8);
+                        $password = $data['password123'] ?: Str::random(8);
 
                                     $user = User::create([
                                         'name' => $record->nama_guru,
