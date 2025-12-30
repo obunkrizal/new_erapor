@@ -1,6 +1,11 @@
-# TODO: Modify ObservasiHarianForm to get siswa and guru after selecting class, and use class rentang for indikator
+# TODO: Create README.md for School Management App
 
-## Tasks
-- [ ] Update guru_id select to auto-set based on selected kelas_id
-- [ ] Modify indikator_id options to use rentang_usia from selected kelas instead of siswa's usia_detail
-- [ ] Test the form functionality to ensure correct population of fields
+- [x] Replace entire README.md content with custom school management app description
+- [x] Include Project Description section
+- [x] Include Features section
+- [x] Include Installation section
+- [x] Include Usage section
+- [x] Include Technologies Used section
+- [x] Include Contributing section
+- [x] Include License section
+- [x] Verify README content after creation
