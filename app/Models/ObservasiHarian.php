@@ -40,4 +40,9 @@ class ObservasiHarian extends Model
     {
         return $this->belongsTo(IndikatorCapaian::class, 'indikator_id');
     }
+
+    public function kelas()
+    {
+        return $this->belongsTo(Kelas::class, 'kelas_id');
+    }
 }

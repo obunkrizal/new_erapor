@@ -15,6 +15,7 @@ class PenilaianSemester extends Model
     protected $fillable = [
         'siswa_id',
         'periode_id',
+        'kelas_id',
         'dimensi_id',
         'kategori_akhir',
         'narasi_auto',

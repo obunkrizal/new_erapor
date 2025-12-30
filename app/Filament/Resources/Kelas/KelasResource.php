@@ -304,7 +304,7 @@ class KelasResource extends Resource
                     ->label('Kapasitas Penuh')
                 ->query(
                     fn(Builder $query): Builder =>
-                        $query->whereRaw('(SELECT COUNT(*) FROM kelas_siswa WHERE kelas_id = kelas.id AND status = "aktif") >= kapasitas')
+                        $query->whereRaw('(SELECT COUNT(*) FROM kelas_siswas WHERE kelas_id = kelas.id AND status = "aktif") >= kapasitas')
                     )
                     ->toggle(),
 
@@ -312,7 +312,7 @@ class KelasResource extends Resource
                     ->label('Hampir Penuh (≥90%)')
                 ->query(
                     fn(Builder $query): Builder =>
-                        $query->whereRaw('(SELECT COUNT(*) FROM kelas_siswa WHERE kelas_id = kelas.id AND status = "aktif") >= (kapasitas * 0.9)')
+                        $query->whereRaw('(SELECT COUNT(*) FROM kelas_siswas WHERE kelas_id = kelas.id AND status = "aktif") >= (kapasitas * 0.9)')
                     )
                     ->toggle(),
 
@@ -320,7 +320,7 @@ class KelasResource extends Resource
                     ->label('Masih Kosong')
                 ->query(
                     fn(Builder $query): Builder =>
-                        $query->whereRaw('(SELECT COUNT(*) FROM kelas_siswa WHERE kelas_id = kelas.id AND status = "aktif") = 0')
+                        $query->whereRaw('(SELECT COUNT(*) FROM kelas_siswas WHERE kelas_id = kelas.id AND status = "aktif") = 0')
                     )
                     ->toggle(),
             ])

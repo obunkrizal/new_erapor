@@ -38,8 +38,8 @@ class PeriodeResource extends Resource
     protected static ?string $navigationLabel = 'Periode Akademik';
     protected static ?string $modelLabel = 'Periode';
     protected static ?string $pluralModelLabel = 'Periode Akademik';
-    protected static string | \UnitEnum | null $navigationGroup = 'Akademik';
-    protected static ?int $navigationSort = 3;
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Master';
+    protected static ?int $navigationSort = 2;
 
     // Hide navigation for guru
     public static function shouldRegisterNavigation(): bool

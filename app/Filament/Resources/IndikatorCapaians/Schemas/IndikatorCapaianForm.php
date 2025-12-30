@@ -41,7 +41,6 @@ class IndikatorCapaianForm
                             ->label('Rentang Usia')
                             ->options([
                                 '2-3' => '2 - 3 Tahun',
-                                '3-4' => '3 - 4 Tahun',
                                 '4-5' => '4 - 5 Tahun',
                                 '5-6' => '5 - 6 Tahun',
                             ])

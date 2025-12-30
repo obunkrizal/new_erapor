@@ -292,14 +292,18 @@ class PaudDimensiIndikatorSeeder extends Seeder
 
         foreach ($dimensiIds as $kode => $dimensiId) {
             foreach ($kategori as $kat) {
-                DB::table('template_narasi')->insertOrIgnore([
-                    'dimensi_id' => $dimensiId,
-                    'kategori_penilaian' => $kat,
-                    'template_kalimat' => $this->getNarasiTemplate($kode, $kat),
-                    'placeholder_options' => json_encode(['kata_puji' => ['baik', 'sangat baik', 'luar biasa']]),
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
+                DB::table('template_narasi')->updateOrInsert(
+                    [
+                        'dimensi_id' => $dimensiId,
+                        'kategori_penilaian' => $kat
+                    ],
+                    [
+                        'template_kalimat' => $this->getNarasiTemplate($kode, $kat),
+                        'placeholder_options' => json_encode(['kata_puji' => ['baik', 'sangat baik', 'luar biasa']]),
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]
+                );
             }
         }
     }
@@ -317,13 +321,13 @@ class PaudDimensiIndikatorSeeder extends Seeder
     private function getNarasiTemplate(string $kode, string $kategori): string
     {
         $templates = [
-            'BSB' => '{nama} berkembang SANGAT BAIK ({usia}) dalam {dimensi}',
-            'BSH' => '{nama} berkembang SESUAI HARAPAN ({usia}) dalam {dimensi}',
-            'MB' => '{nama} MULAI berkembang ({usia}) dalam {dimensi}',
-            'BB' => '{nama} BELUM berkembang ({usia}) dalam {dimensi}'
+            'BSB' => '{nama_lengkap} berkembang SANGAT BAIK  dalam indikator {dimensi.deskripsi}',
+            'BSH' => '{nama_lengkap} berkembang SESUAI HARAPAN  dalam indikator {dimensi.deskripsi}',
+            'MB' => '{nama_lengkap} MULAI berkembang  dalam indikator {dimensi.deskripsi}',
+            'BB' => '{nama_lengkap} BELUM berkembang  dalam indikator {dimensi.deskripsi}'
         ];
 
-        return str_replace(['{usia}', '{dimensi}'], ['usia', $kode], $templates[$kategori]);
+        return str_replace(['{dimensi}'], [$kode], $templates[$kategori]);
     }
 
     private function showSummaryByUsia(): void

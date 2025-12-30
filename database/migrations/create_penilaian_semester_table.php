@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('penilaian_semester', function (Blueprint $table) {
             $table->id();
             $table->foreignId('siswa_id')->constrained('siswas')->onDelete('cascade');
+            $table->foreignId('kelas_id')->constrained('kelas')->onDelete('cascade');
             $table->foreignId('periode_id')->constrained('periodes')->onDelete('cascade');
             $table->foreignId('dimensi_id')->constrained('dimensi_pembelajaran')->onDelete('cascade');
             $table->enum('kategori_akhir', ['BB', 'MB', 'BSH', 'BSB']);

@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('ekstrakurikuler', function (Blueprint $table) {
-            $table->enum('rentang_usia', ['2-3', '4-5', '5-6'])->nullable();
-            $table->index('rentang_usia');
+        Schema::table('kelas_siswas', function (Blueprint $table) {
+            //
         });
     }
 
@@ -22,9 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('ekstrakurikuler', function (Blueprint $table) {
-            $table->dropIndex(['rentang_usia']);
-            $table->dropColumn('rentang_usia');
+        Schema::table('kelas_siswas', function (Blueprint $table) {
+            //
         });
     }
 };

@@ -2,15 +2,16 @@
 
 namespace App\Filament\Resources\PenilaianSemesters\Pages;
 
-use App\Filament\Resources\PenilaianSemesters\PenilaianSemesterResource;
-use App\Models\Periode;
+use App\Models\Kelas;
 use App\Models\Siswa;
-use App\Services\AutoNarasiGenerator;
-use Filament\Actions\CreateAction;
+use App\Models\Periode;
 use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
+use App\Services\AutoNarasiGenerator;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\PenilaianSemesters\PenilaianSemesterResource;
 
 class ListPenilaianSemesters extends ListRecords
 {
@@ -31,10 +32,21 @@ class ListPenilaianSemesters extends ListRecords
                         ->required()
                         ->searchable()
                         ->preload(),
+                Select::make('kelas_id')
+                    ->label('Kelas')
+                    ->options(Kelas::all()->pluck('nama_kelas', 'id'))
+                    ->required()
+                    ->searchable()
+                    ->preload(),
                 ])
                 ->action(function (array $data): void {
                     $periode = Periode::find($data['periode_id']);
-                    $siswaList = Siswa::all();
+                    $kelas = Kelas::find($data['kelas_id']);
+                    $siswaList = Siswa::whereHas('kelasSiswa', function($q) use ($kelas, $periode) {
+                        $q->where('kelas_id', $kelas->id)
+                          ->where('periode_id', $periode->id)
+                          ->where('status', 'aktif');
+                    })->get();
 
                     $generator = new AutoNarasiGenerator();
                     $totalGenerated = 0;
@@ -46,13 +58,13 @@ class ListPenilaianSemesters extends ListRecords
 
                     Notification::make()
                         ->title('Auto Penilaian Generated')
-                        ->body("Successfully generated {$totalGenerated} assessments for period {$periode->nama_periode}")
+                    ->body("Successfully generated {$totalGenerated} assessments for class {$kelas->nama_kelas} in period {$periode->nama_periode}")
                         ->success()
                         ->send();
                 })
                 ->requiresConfirmation()
                 ->modalHeading('Generate Auto Penilaian')
-                ->modalDescription('This will generate automatic assessments for all students in the selected period based on their daily observations.')
+                ->modalDescription('This will generate automatic assessments for students in the selected class and period based on their daily observations.')
                 ->modalSubmitActionLabel('Generate'),
         ];
     }

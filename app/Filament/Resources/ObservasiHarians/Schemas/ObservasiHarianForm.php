@@ -15,6 +15,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Placeholder;
 
 class ObservasiHarianForm
 {
@@ -30,7 +32,8 @@ class ObservasiHarianForm
                             ->schema([
                                 Grid::make(2)
                                     ->schema([
-                                        Select::make('kelas_id')
+
+                        Select::make('kelas_id')
                                             ->label('Kelas')
                                             ->options(Kelas::all()->pluck('nama_kelas', 'id'))
                                             ->searchable()
@@ -38,47 +41,89 @@ class ObservasiHarianForm
                                             ->preload()
                                             ->live()
                                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                            $set('siswa_ids', null);
                                                 $set('siswa_id', null);
                                                 $set('guru_id', null);
                                                 $set('indikator_id', null);
 
-                                                // Auto-set guru_id if kelas has a guru
-                                                $kelasId = $state;
+                            // Auto-set guru_id if kelas has a guru, otherwise set default guru
+                            $kelasId = $state;
                                                 if ($kelasId) {
                                                     $kelas = \App\Models\Kelas::find($kelasId);
                                                     if ($kelas && $kelas->guru_id) {
                                                         $set('guru_id', $kelas->guru_id);
+                                } else {
+                                    // Set default guru if kelas has no guru assigned
+                                    $defaultGuru = \App\Models\Guru::first();
+                                    if ($defaultGuru) {
+                                        $set('guru_id', $defaultGuru->id);
+                                    }
                                                     }
                                                 }
-                                            }),
-                                        Select::make('siswa_id')
-                                            ->label('Siswa')
-                                            ->options(fn($get) => $get('kelas_id') ? \App\Models\KelasSiswa::where('kelas_id', $get('kelas_id'))
-                                                ->where('status', 'aktif')
-                                                ->with('siswa')
-                                                ->get()
-                                                ->pluck('siswa.nama_lengkap', 'siswa.id')
-                                                ->filter()
-                                                ->toArray() : [])
-                                            ->searchable()
-                                            ->required()
-                                            ->preload()
-                                            ->disabled(fn($get) => !$get('kelas_id')),
-                                        Select::make('periode_id')
-                                            ->label('Periode')
-                                            ->options(Periode::all()->pluck('nama_periode', 'id'))
-                                            ->searchable()
-                                            ->required()
-                                            ->preload(),
-                                        Select::make('guru_id')
-                                            ->label('Guru')
-                                            ->options(\App\Models\Guru::pluck('nama_guru', 'id'))
-                                            ->searchable()
-                                            ->preload()
-                                            ->required()
-                                            ->placeholder('Pilih Guru')
-                                            ->helperText('Masukkan guru yang melakukan observasi.'),
-                                    ]),
+                            }),
+                        Select::make('periode_id')
+                            ->label('Periode')
+                            ->options(Periode::all()->pluck('nama_periode', 'id'))
+                            ->default(fn() => Periode::where('is_active', true)->first()?->id)
+                            ->searchable()
+                            ->required()
+                            ->preload(),
+                        Select::make('guru_id')
+                            ->label('Guru')
+                            ->options(\App\Models\Guru::pluck('nama_guru', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->disabled(fn($get) => filled($get('guru_id')))
+                            ->dehydrated(true)
+                            ->placeholder('Pilih Guru')
+                                ->helperText('Guru akan otomatis terisi berdasarkan kelas yang dipilih.'),
+                            Toggle::make('multiple_selection')
+                                ->label('Pilih Multiple Siswa')
+                                ->default(true)
+                                ->live()
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    $set('siswa_ids', null);
+                                    $set('siswa_id', null);
+                                })
+                                ->helperText('Aktifkan untuk memilih lebih dari satu siswa sekaligus'),
+                            // Multiple selection
+                            Select::make('siswa_ids')
+                                ->label('Pilih Siswa (Multiple)')
+                                ->options(fn($get) => $get('kelas_id') ? \App\Models\KelasSiswa::where('kelas_id', $get('kelas_id'))
+                                    ->where('status', 'aktif')
+                                    ->with('siswa')
+                                    ->get()
+                                    ->pluck('siswa.nama_lengkap', 'siswa.id')
+                                    ->filter()
+                                    ->toArray() : [])
+                                ->multiple()
+                                ->searchable()
+                                ->required(fn($get) => $get('multiple_selection'))
+                                ->preload()
+                                ->visible(fn($get) => $get('multiple_selection'))
+                                ->disabled(fn($get) => !$get('kelas_id'))
+                                ->helperText('Pilih satu atau lebih siswa yang akan diobservasi')
+                                ->columnSpanFull(),
+
+                            // Single selection
+                            Select::make('siswa_id')
+                                ->label('Pilih Siswa')
+                                ->options(fn($get) => $get('kelas_id') ? \App\Models\KelasSiswa::where('kelas_id', $get('kelas_id'))
+                                    ->where('status', 'aktif')
+                                    ->with('siswa')
+                                    ->get()
+                                    ->pluck('siswa.nama_lengkap', 'siswa.id')
+                                    ->filter()
+                                    ->toArray() : [])
+                                ->searchable()
+                                ->required(fn($get) => !$get('multiple_selection'))
+                                ->preload()
+                                ->visible(fn($get) => !$get('multiple_selection'))
+                                ->disabled(fn($get) => !$get('kelas_id'))
+                                ->helperText('Pilih satu siswa yang akan diobservasi'),
+
+                        ]),
                             ]),
 
                         Section::make('Detail Observasi')
@@ -155,7 +200,6 @@ class ObservasiHarianForm
                     ->columnSpan(2),
 
 
-            ])
-            ;
+            ]);
     }
 }

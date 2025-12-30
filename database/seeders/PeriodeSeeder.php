@@ -17,29 +17,22 @@ class PeriodeSeeder extends Seeder
         $periodes = [
 
             [
-                'nama_periode' => 'Semester Ganjil 2024/2025',
-                'tahun_ajaran' => '2024/2025',
+                'nama_periode' => 'Semester Ganjil 2025/2026',
+                'tahun_ajaran' => '2025/2026',
                 'semester' => 'ganjil',
                 'is_active' => true,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
-                'nama_periode' => 'Semester Genap 2024/2025',
-                'tahun_ajaran' => '2024/2025',
+                'nama_periode' => 'Semester Genap 2025/2026',
+                'tahun_ajaran' => '2025/2026',
                 'semester' => 'genap',
                 'is_active' => false,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
-            [
-                'nama_periode' => 'Semester Ganjil 2025/2026',
-                'tahun_ajaran' => '2025/2026',
-                'semester' => 'ganjil',
-                'is_active' => false,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
+
         ];
 
         DB::table('periodes')->insert($periodes);

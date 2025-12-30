@@ -519,7 +519,7 @@ class KelasSiswaResource extends Resource
                 $namaKelas = $record->kelas?->rentang_usia   ?? '';
 
                 // Option 1: Color based on grade level
-                if (str_contains($namaKelas, '2-3') || str_contains($namaKelas, '2-3    ')) {
+                if (str_contains($namaKelas, '2-3') || str_contains($namaKelas, '2-3')) {
                             return 'success'; // Green for grade 10
                 } elseif (str_contains($namaKelas, '4-5') || str_contains($namaKelas, '4-5')) {
                             return 'warning'; // Yellow for grade 11
@@ -527,17 +527,14 @@ class KelasSiswaResource extends Resource
                             return 'danger'; // Red for grade 12
                         }
 
-                // Option 2: Color based on specific class names
-                if (str_contains($namaKelas, 'A') || str_contains($namaKelas, 'A')) {
-                    return 'primary';
-                        }
 
-                        // Option 3: Random colors based on class ID for variety
-                        $colors = ['primary', 'secondary', 'success', 'warning', 'danger', 'info'];
+
+                // Option 3: Random colors based on class ID for variety
+                $colors = ['primary', 'secondary', 'success', 'warning', 'danger', 'info'];
                         return $colors[($record->kelas_id ?? 0) % count($colors)];
                     })
                     ->icon(function (KelasSiswa $record): string {
-                $namaKelas = $record->kelas?->rentang_usia ?? '';
+                $namaKelas = $record->kelas?->nama_kelas ?? '';
 
                 // Different icons based on class
                 if (str_contains($namaKelas, '2-3') || str_contains($namaKelas, '2-3')) {
@@ -563,11 +560,7 @@ class KelasSiswaResource extends Resource
                         }
 
                         return $namaKelas;
-                })
-                ->description(
-                    fn(KelasSiswa $record): string =>
-                    'Rentang Usia: ' . ($record->kelas?->rentang_usia ?? 'N/A')
-                ),
+                }),
 
             TextColumn::make('periode.nama_periode')
                     ->label('Periode')
@@ -605,7 +598,8 @@ class KelasSiswaResource extends Resource
                         'genap' => 'warning',
                         default => 'gray',
                     })
-                ->formatStateUsing(fn(?string $state): string => $state ? ucfirst($state) : 'N/A'),
+                ->formatStateUsing(fn(?string $state): string => $state ? ucfirst($state) : 'N/A')
+                ->toggleable(),
 
             TextColumn::make('status')
                     ->label('Status')
@@ -817,7 +811,7 @@ class KelasSiswaResource extends Resource
 
                                 notyf()->error(' Perpindahan kelas gagal dilakukan, Kelas sudah penuh');
                     }
-                        })
+                })
                         ->requiresConfirmation()
                         ->modalHeading('Pindah Kelas Siswa')
                         ->modalDescription('Pastikan data perpindahan kelas sudah benar sebelum melanjutkan.')

@@ -80,7 +80,7 @@ class PenilaianPAUDSeeder extends Seeder
             [
                 'dimensi_id' => $literasi_id,
                 'kategori_penilaian' => 'BSB',
-                'template_kalimat' => '{nama} dapat mengenal dan menulis huruf serta membaca kata sederhana dengan sangat baik.',
+                'template_kalimat' => '{nama_lengkap} dapat mengenal dan menulis huruf serta membaca kata sederhana dengan sangat baik.',
                 'placeholder_options' => json_encode([
                     'kemampuan' => ['mengenal huruf vokal dan konsonan', 'menulis nama sendiri', 'membaca kata sederhana'],
                     'kualitas' => ['dengan sangat baik', 'dengan mandiri', 'dengan antusias']
@@ -89,19 +89,19 @@ class PenilaianPAUDSeeder extends Seeder
             [
                 'dimensi_id' => $literasi_id,
                 'kategori_penilaian' => 'BSH',
-                'template_kalimat' => '{nama} dapat mengenal huruf dan mulai belajar menulis dengan baik.',
+                'template_kalimat' => '{nama_lengkap} dapat mengenal huruf dan mulai belajar menulis dengan baik.',
                 'placeholder_options' => null
             ],
             [
                 'dimensi_id' => $literasi_id,
                 'kategori_penilaian' => 'MB',
-                'template_kalimat' => '{nama} mulai mengenal beberapa huruf sederhana dan perlu pendampingan dalam menulis.',
+                'template_kalimat' => '{nama_lengkap} mulai mengenal beberapa huruf sederhana dan perlu pendampingan dalam menulis.',
                 'placeholder_options' => null
             ],
             [
                 'dimensi_id' => $literasi_id,
                 'kategori_penilaian' => 'BB',
-                'template_kalimat' => '{nama} belum mampu mengenal huruf secara konsisten dan memerlukan bimbingan intensif.',
+                'template_kalimat' => '{nama_lengkap} belum mampu mengenal huruf secara konsisten dan memerlukan bimbingan intensif.',
                 'placeholder_options' => null
             ]
         ];
@@ -117,7 +117,7 @@ class PenilaianPAUDSeeder extends Seeder
             [
                 'dimensi_id' => $agama_id,
                 'kategori_penilaian' => 'BSB',
-                'template_kalimat' => '{nama} dapat menghafal doa harian dan melaksanakan ibadah sederhana dengan baik.',
+                'template_kalimat' => '{nama_lengkap} dapat menghafal doa harian dan melaksanakan ibadah sederhana dengan baik.',
                 'placeholder_options' => json_encode([
                     'ibadah' => ['doa makan', 'doa tidur', 'doa masuk kamar mandi'],
                     'sikap' => ['dengan khusyuk', 'dengan tertib', 'dengan mandiri']
@@ -126,19 +126,19 @@ class PenilaianPAUDSeeder extends Seeder
             [
                 'dimensi_id' => $agama_id,
                 'kategori_penilaian' => 'BSH',
-                'template_kalimat' => '{nama} dapat mengikuti kegiatan ibadah dengan baik.',
+                'template_kalimat' => '{nama_lengkap} dapat mengikuti kegiatan ibadah dengan baik.',
                 'placeholder_options' => null
             ],
             [
                 'dimensi_id' => $agama_id,
                 'kategori_penilaian' => 'MB',
-                'template_kalimat' => '{nama} mulai belajar mengenal praktik ibadah sederhana.',
+                'template_kalimat' => '{nama_lengkap} mulai belajar mengenal praktik ibadah sederhana.',
                 'placeholder_options' => null
             ],
             [
                 'dimensi_id' => $agama_id,
                 'kategori_penilaian' => 'BB',
-                'template_kalimat' => '{nama} belum dapat mengikuti kegiatan ibadah secara mandiri.',
+                'template_kalimat' => '{nama_lengkap} belum dapat mengikuti kegiatan ibadah secara mandiri.',
                 'placeholder_options' => null
             ]
         ];

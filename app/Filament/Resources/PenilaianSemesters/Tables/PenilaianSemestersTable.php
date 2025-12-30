@@ -20,7 +20,7 @@ class PenilaianSemestersTable
                     ->label('Nama Siswa')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('siswa.kelas.nama_kelas')
+            TextColumn::make('kelas.nama_kelas')
                     ->label('Kelas')
                     ->sortable(),
                 TextColumn::make('periode.nama_periode')
@@ -52,7 +52,7 @@ class PenilaianSemestersTable
                     ->limit(50)
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
-                        if (strlen($state) <= $column->getLimit()) {
+                if (strlen($state) <= 50) {
                             return null;
                         }
                         return $state;

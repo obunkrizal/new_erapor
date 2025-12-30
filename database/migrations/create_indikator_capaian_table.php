@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('dimensi_id')->constrained('dimensi_pembelajaran')->onDelete('cascade');
             $table->string('kode_indikator', 30);
             $table->text('deskripsi');
-            $table->enum('rentang_usia', ['3-4', '4-5', '5-6'])->default('5-6');
+            $table->enum('rentang_usia', ['2-3', '4-5', '5-6'])->default('5-6');
             $table->integer('urutan')->default(0);
             $table->timestamps();
 

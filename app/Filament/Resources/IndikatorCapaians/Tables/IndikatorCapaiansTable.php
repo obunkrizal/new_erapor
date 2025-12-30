@@ -28,15 +28,13 @@ class IndikatorCapaiansTable
                     ->label('Rentang Usia')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        '2-3'=>'danger',
-                        '3-4' => 'success',
+                '2-3' => 'danger',
                         '4-5' => 'info',
                         '5-6' => 'warning',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        '2-3' => '2 - 3 Tahun',
-                        '3-4' => '3 - 4 Tahun',
+                '2-3' => '2 - 3 Tahun',
                         '4-5' => '4 - 5 Tahun',
                         '5-6' => '5 - 6 Tahun',
                         default => $state,

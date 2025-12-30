@@ -20,9 +20,10 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'admin',
+        User::firstOrCreate([
             'email' => 'admin@gmail.com',
+        ], [
+            'name' => 'admin',
             'password' => bcrypt('admin@123'),
             'role' => 'admin',
         ]);
@@ -34,9 +35,11 @@ class DatabaseSeeder extends Seeder
             SiswaSeeder::class,
             GuruSeeder::class,
             PeriodeSeeder::class,
+            KelasSeeder::class,
             SuratKeputusanGuruSeeder::class,
             PaudDimensiIndikatorSeeder::class,
             PaudEkstrakurikulerSeeder::class, // PaudEkstrakurikulerSeeder::class,
+            PaudObservasiHarian::class,
         ]);
     }
 }

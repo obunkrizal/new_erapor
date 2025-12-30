@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('observasi_harian', function (Blueprint $table) {
             $table->id();
             $table->foreignId('siswa_id')->constrained('siswas')->onDelete('cascade');
+            $table->foreignId('kelas_id')->constrained('kelas')->onDelete('cascade');
             $table->foreignId('guru_id')->constrained('gurus')->onDelete('cascade');
             $table->foreignId('indikator_id')->constrained('indikator_capaian')->onDelete('cascade');
             $table->date('tanggal_observasi');

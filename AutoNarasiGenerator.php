@@ -11,31 +11,21 @@ class AutoNarasiGenerator
     /**
      * Generate narasi penilaian untuk semua dimensi seorang siswa
      */
-    public function generatePenilaianSemester($siswa_id, $periode_id)
+    public function generatePenilaianSemester($siswa_id, $periode)
     {
-        $periode_dates = $this->getPeriodeSemester($periode_id);
+        $periode = $this->getPeriodeSemester($periode);
         $dimensi_list = DimensiPembelajaran::where('is_active', true)->orderBy('urutan')->get();
-
-        // Get kelas_id from kelas_siswa for this siswa and periode
-        $kelas_siswa = \App\Models\KelasSiswa::where('siswa_id', $siswa_id)
-            ->where('periode_id', $periode_id)
-            ->first();
-
-        if (!$kelas_siswa) {
-            throw new \Exception("Siswa tidak terdaftar di kelas untuk periode ini");
-        }
 
         $hasil = [];
 
         foreach ($dimensi_list as $dimensi) {
-            $narasi = $this->generateNarasiDimensi($siswa_id, $dimensi->id, $periode_dates['start'], $periode_dates['end']);
+            $narasi = $this->generateNarasiDimensi($siswa_id, $dimensi->id, $periode['start'], $periode['end']);
 
             if ($narasi) {
                 $penilaian = PenilaianSemester::updateOrCreate(
                     [
                         'siswa_id' => $siswa_id,
-                        'periode_id' => $periode_id,
-                        'kelas_id' => $kelas_siswa->kelas_id,
+                        'periode_id' => $periode,
                         'dimensi_id' => $dimensi->id
                     ],
                     [
@@ -59,7 +49,7 @@ class AutoNarasiGenerator
         // Ambil semua observasi untuk dimensi ini
         $observasi = ObservasiHarian::where('siswa_id', $siswa_id)
             ->whereBetween('tanggal_observasi', [$tanggal_mulai, $tanggal_akhir])
-            ->whereHas('indikator', function ($q) use ($dimensi_id) {
+            ->whereHas('indikator', function($q) use ($dimensi_id) {
                 $q->where('dimensi_id', $dimensi_id);
             })
             ->with(['indikator', 'siswa'])
@@ -118,19 +108,17 @@ class AutoNarasiGenerator
     private function parseTemplate($template, $observasi)
     {
         $siswa = $observasi->first()->siswa;
-        $dimensi = DimensiPembelajaran::find($template->dimensi_id);
         $narasi = $template->template_kalimat;
 
         // Replace placeholder dasar
-        $narasi = str_replace('{nama_lengkap}', $siswa->nama_lengkap, $narasi);
-        $narasi = str_replace('{nama_panggilan}', $siswa->nama_panggilan ?? $siswa->nama_lengkap, $narasi);
-        $narasi = str_replace('{dimensi.deskripsi}', $dimensi->deskripsi ?? '', $narasi);
+        $narasi = str_replace('{nama}', $siswa->nama, $narasi);
+        $narasi = str_replace('{nama_panggilan}', $siswa->nama_panggilan ?? $siswa->nama, $narasi);
 
         // Replace placeholder dari options
         if ($template->placeholder_options) {
             foreach ($template->placeholder_options as $key => $values) {
                 if (is_array($values) && !empty($values)) {
-                    $narasi = str_replace('{' . $key . '}', $values[array_rand($values)], $narasi);
+                    $narasi = str_replace('{'.$key.'}', $values[array_rand($values)], $narasi);
                 }
             }
         }
@@ -172,16 +160,9 @@ class AutoNarasiGenerator
     /**
      * Hitung periode tanggal untuk semester
      */
-    private function getPeriodeSemester($periode_id)
+    private function getPeriodeSemester($periode)
     {
-        $periode = \App\Models\Periode::find($periode_id);
-
-        if (!$periode) {
-            throw new \Exception("Periode not found");
-        }
-
-        $tahun = (int) $periode->tahun_ajaran;
-        $semester = $periode->semester;
+        $tahun = (int) substr($periode, 0, 4);
 
         if ($semester === 'ganjil') {
             return [
